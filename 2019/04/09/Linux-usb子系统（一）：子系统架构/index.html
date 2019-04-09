@@ -4,23 +4,24 @@
 <head><meta name="generator" content="Hexo 3.8.0">
   <meta charset="UTF-8">
   
-    <title>Born</title>
+    <title>Linux usb子系统（一）：子系统架构 | Born</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
     
     <meta name="author" content="Born">
     
 
     
-    <meta name="description" content="生活就是一个迷">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Born">
-<meta property="og:url" content="http://yoursite.com/index.html">
+    <meta name="description" content="Linux usb子系统（一）：子系统架构一、USB协议基础知识   前序：USB概念概述 　　USB1.0版本速度1.5Mbps（低速USB） USB1.1版本速度12Mbps（全速USB）  USB2.0版本速度480Mbps（高速USB）。 　　USB 分为主从两大体系，一般而言， PC 中的 USB 系统就是作主，而一般的 USB 鼠标， U 盘则是典型的 USB 从系统。 　　USB主控">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux usb子系统（一）：子系统架构">
+<meta property="og:url" content="http://yoursite.com/2019/04/09/Linux-usb子系统（一）：子系统架构/index.html">
 <meta property="og:site_name" content="Born">
-<meta property="og:description" content="生活就是一个迷">
+<meta property="og:description" content="Linux usb子系统（一）：子系统架构一、USB协议基础知识   前序：USB概念概述 　　USB1.0版本速度1.5Mbps（低速USB） USB1.1版本速度12Mbps（全速USB）  USB2.0版本速度480Mbps（高速USB）。 　　USB 分为主从两大体系，一般而言， PC 中的 USB 系统就是作主，而一般的 USB 鼠标， U 盘则是典型的 USB 从系统。 　　USB主控">
 <meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-04-09T12:02:54.089Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Born">
-<meta name="twitter:description" content="生活就是一个迷">
+<meta name="twitter:title" content="Linux usb子系统（一）：子系统架构">
+<meta name="twitter:description" content="Linux usb子系统（一）：子系统架构一、USB协议基础知识   前序：USB概念概述 　　USB1.0版本速度1.5Mbps（低速USB） USB1.1版本速度12Mbps（全速USB）  USB2.0版本速度480Mbps（高速USB）。 　　USB 分为主从两大体系，一般而言， PC 中的 USB 系统就是作主，而一般的 USB 鼠标， U 盘则是典型的 USB 从系统。 　　USB主控">
 
     
     <link rel="alternative" href="/atom.xml" title="Born" type="application/atom+xml">
@@ -74,800 +75,10 @@
 </div>
     </header>
     <div id="container">
-      <div id="main">
-
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2019/04/09/lcm-ESD/" title="lcm ESD" itemprop="url">lcm ESD</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Born" target="_blank" itemprop="author">Born</a>
-		
-  </p><p class="article-time">
-    <time datetime="2019-04-09T12:33:40.000Z" itemprop="datePublished"> 发表于 2019-04-09</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <h3 id="MTK-平台LCM-ESD客制化及代码分析和案例"><a href="#MTK-平台LCM-ESD客制化及代码分析和案例" class="headerlink" title="MTK 平台LCM ESD客制化及代码分析和案例"></a>MTK 平台LCM ESD客制化及代码分析和案例</h3><p>参考文档：<br>[FAQ14251]如何配置LCM ESD Check——读寄存器方式<br><a href="https://onlinesso.mediatek.com/FAQ/SW/FAQ14251" target="_blank" rel="noopener">https://onlinesso.mediatek.com/FAQ/SW/FAQ14251</a><br>[FAQ14273]MT6735/MT6753/MT6580 ESD问题攻略——外部TE方式<br><a href="https://onlinesso.mediatek.com/FAQ/SW/FAQ14273" target="_blank" rel="noopener">https://onlinesso.mediatek.com/FAQ/SW/FAQ14273</a><br>[FAQ14880]LCM ESD Check 问题处理流程<br><a href="https://onlinesso.mediatek.com/FAQ/SW/FAQ14880" target="_blank" rel="noopener">https://onlinesso.mediatek.com/FAQ/SW/FAQ14880</a><br>[FAQ13728]MT6735通过读寄存器方式做ESD，客制化需求—-多个返回值<br><a href="https://onlinesso.mediatek.com/FAQ/SW/FAQ13728" target="_blank" rel="noopener">https://onlinesso.mediatek.com/FAQ/SW/FAQ13728</a></p>
-<p>一．LCM ESD客制化方法<br>alps/kernel-3.18/drivers/misc/mediatek/lcm/xxx/xxx.c<br>alps/vendor/mediatek/proprietary/bootable/bootloader/lk/dev/lcm/xxx/xxx.c<br>static void lcm_get_params(LCM_PARAMS <em>params)<br>{<br>……<br>        /</em> Esd Check方法1 : Read from lcm */<br>        params-&gt;dsi.esd_check_enable = 1;<br>        params-&gt;dsi.customization_esd_check_enable = 1;<br>        params-&gt;dsi.lcm_esd_check_table[0].cmd = 0x0A; //具体是哪个寄存器由FAE告知<br>        params-&gt;dsi.lcm_esd_check_table[0].count = 1;<br>        params-&gt;dsi.lcm_esd_check_table[0].para_list[0] = 0x1C; //读取寄存器的正确值也由FAE告知，寄存器的值要配置正确，否则会不断地esd recovery</p>
-<p>/<em> Esd Check方法2 : EXT TE </em>/<br>        //params-&gt;dsi.esd_check_enable = 1;<br>        //params-&gt;dsi.customization_esd_check_enable = 0;<br>}</p>
-<p>二．MT6580 LCM ESD check流程分析<br>alps/kernel-3.18/drivers/misc/mediatek/video/mt6580/videox/primary_display.c</p>
-<p>int primary_display_init(char *lcm_name, unsigned int lcm_fps)<br>{<br>……<br>        primary_display_esd_check_task =<br>            kthread_create(primary_display_esd_check_worker_kthread,<br>                   NULL, “display_esd_check”);<br>……<br>//这里根据LCM中配置的params-&gt;dsi.esd_check_enable是否等于1来判断是否开启primary_display_esd_check_worker_kthread线程<br>        if (_need_do_esd_check())<br>            wake_up_process(primary_display_esd_check_task);<br>……<br>}</p>
-<p>unsigned int _need_do_esd_check(void)<br>{<br>    int ret = 0;</p>
-<p>#ifdef CONFIG_OF<br>    if ((pgc-&gt;plcm-&gt;params-&gt;dsi.esd_check_enable == 1)<br>        &amp;&amp; (islcmconnected == 1))<br>        ret = 1;</p>
-<p>#else<br>    if (pgc-&gt;plcm-&gt;params-&gt;dsi.esd_check_enable == 1)<br>        ret = 1;</p>
-<p>#endif<br>    return ret;<br>}</p>
-<p>static int primary_display_esd_check_worker_kthread(void <em>data)<br>{<br>……<br>//定义esd recovery重试的次数<br>int esd_try_cnt = 5;<br>……<br>//这里每2秒扫描一次<br>        msleep(2000);    /</em> esd check and pull clock lane every 2s */<br>……<br>//执行esd check判断是否要进行esd recovery，关于primary_display_esd_check函数的分析在下面会讲到<br>        ret = primary_display_esd_check();<br>        if (ret == 1) {<br>            pr_debug(“[ESD]esd check fail, will do esd recovery\n”);<br>            i = esd_try_cnt;<br>            while (i–) {<br>                DISPCHECK(“[ESD]esd recovery try:%d\n”, i);<br>                //执行恢复动作，重新初始化显示屏参数，关于primary_display_esd_recovery函数的分析在下面有讲到<br>                primary_display_esd_recovery();<br>                //执行完恢复动作后，再次进行esd check，如果检测到的lcm寄存器的值正常，则不会再进行recovery的动作；否则会连续进行recovery和esd check，若在规定的5次内recovery均不成功，就会执行primary_display_esd_check_enable(0)关闭primary_display_esd_check_worker_kthread线程。<br>                ret = primary_display_esd_check();<br>                if (ret == 0) {<br>                    pr_debug<br>                        (“[ESD]esd recovery success\n”);<br>                    break;<br>                }<br>                pr_debug(“[ESD]after esd recovery, esd check still fail\n”);<br>                if (i == 0) {<br>                    DISPERR(<br>                    “[ESD]after esd recovery %d times, esd check still fail, disable esd check\n”,<br>                         esd_try_cnt);<br>                    primary_display_esd_check_enable(0);<br>                }<br>            }<br>        }<br>……<br>}</p>
-<p>/<em> ESD CHECK FUNCTION </em>/<br>/<em> return 1: esd check fail </em>/<br>/<em> return 0: esd check pass </em>/<br>int primary_display_esd_check(void)<br>{<br>……<br>    /<em> Esd Check : EXT TE </em>/<br>    //使用TE的方式进行esd check的时候，需要在lcm的驱动中定义esd_check_enable为1，customization_esd_check_enable为0，lcm的初始化参数也要匹配TE的，主控这边的TE GPIO口需要配置正确<br>    if (pgc-&gt;plcm-&gt;params-&gt;dsi.customization_esd_check_enable == 0) {<br>        MMProfileLogEx(ddp_mmp_get_events()-&gt;esd_extte,<br>                   MMProfileFlagStart, 0, 0);<br>        if (primary_display_is_video_mode()) {<br>            primary_display_switch_esd_mode(1);<br>            /<em> use cmdq to pull DSI clk lane</em>/<br>            if (primary_display_cmdq_enabled()) {<br>                _primary_path_lock(<strong>func</strong>);</p>
-<pre><code>            /* 0.create esd check cmdq */
-            cmdqRecCreate(CMDQ_SCENARIO_DISP_ESD_CHECK, &amp;(pgc-&gt;cmdq_handle_config_esd));
-            _primary_path_unlock(__func__);
-
-            /* 1.reset*/
-            cmdqRecReset(pgc-&gt;cmdq_handle_config_esd);
-
-            /* wait stream eof first */
-            ret = cmdqRecWait(pgc-&gt;cmdq_handle_config_esd, CMDQ_EVENT_DISP_RDMA0_EOF);
-            cmdqRecWait(pgc-&gt;cmdq_handle_config_esd, CMDQ_EVENT_MUTEX0_STREAM_EOF);
-
-            _primary_path_lock(__func__);
-            /* 2.stop dsi vdo mode */
-            dpmgr_path_build_cmdq(pgc-&gt;dpmgr_handle,
-                        pgc-&gt;cmdq_handle_config_esd, CMDQ_STOP_VDO_MODE, 0);
-
-            /* 3.pull DSI clock lane */
-            DSI_sw_clk_trail_cmdq(0, pgc-&gt;cmdq_handle_config_esd);
-            DSI_manual_enter_HS(pgc-&gt;cmdq_handle_config_esd);
-
-
-            /* 4.start dsi vdo mode */
-            dpmgr_path_build_cmdq(pgc-&gt;dpmgr_handle,
-                        pgc-&gt;cmdq_handle_config_esd, CMDQ_START_VDO_MODE, 0);
-
-            /* 5. trigger path */
-            cmdqRecClearEventToken(pgc-&gt;cmdq_handle_config_esd, CMDQ_EVENT_MUTEX0_STREAM_EOF);
-
-            dpmgr_path_trigger(pgc-&gt;dpmgr_handle, pgc-&gt;cmdq_handle_config_esd, CMDQ_ENABLE);
-
-            _primary_path_unlock(__func__);
-            cmdqRecFlush(pgc-&gt;cmdq_handle_config_esd);
-
-            cmdqRecDestroy(pgc-&gt;cmdq_handle_config_esd);
-            pgc-&gt;cmdq_handle_config_esd = NULL;
-        }
-        if (_need_register_eint()) {
-            MMProfileLogEx(ddp_mmp_get_events()-&gt;esd_extte,
-                       MMProfileFlagPulse, 1, 1);
-
-            if (wait_event_interruptible_timeout
-                (esd_ext_te_wq,
-                 atomic_read(&amp;esd_ext_te_event),
-                 HZ / 2) &gt; 0) {
-                ret = 0;    /* esd check pass */
-            } else {
-                ret = 1;    /* esd check fail */
-            }
-            atomic_set(&amp;esd_ext_te_event, 0);
-        }
-        primary_display_switch_esd_mode(0);
-    } else {
-        MMProfileLogEx(ddp_mmp_get_events()-&gt;esd_extte,
-                   MMProfileFlagPulse, 0, 1);
-        if (dpmgr_wait_event_timeout
-            (pgc-&gt;dpmgr_handle, DISP_PATH_EVENT_IF_VSYNC,
-             HZ / 2) &gt; 0) {
-            ret = 0;    /* esd check pass */
-        } else {
-            ret = 1;    /* esd check fail */
-        }
-    }
-    MMProfileLogEx(ddp_mmp_get_events()-&gt;esd_extte,
-               MMProfileFlagEnd, 0, ret);
-    /* _primary_path_unlock(__func__); */
-    goto done;
-}
-/* / Esd Check : Read from lcm */
-//读LCM寄存器方式进行esd check和recovery
-MMProfileLogEx(ddp_mmp_get_events()-&gt;esd_rdlcm, MMProfileFlagStart, 0,
-           primary_display_cmdq_enabled());
-if (primary_display_cmdq_enabled()) {
-    _primary_path_lock(__func__);
-    MMProfileLogEx(ddp_mmp_get_events()-&gt;esd_rdlcm,
-               MMProfileFlagPulse, 0, 1);
-
-    /* 0.create esd check cmdq */
-    cmdqRecCreate(CMDQ_SCENARIO_DISP_ESD_CHECK,
-              &amp;(pgc-&gt;cmdq_handle_config_esd));
-    dpmgr_path_build_cmdq(pgc-&gt;dpmgr_handle,
-                  pgc-&gt;cmdq_handle_config_esd,
-                  CMDQ_ESD_ALLC_SLOT, 0);
-    MMProfileLogEx(ddp_mmp_get_events()-&gt;esd_rdlcm,
-               MMProfileFlagPulse, 0, 2);
-    DISPCHECK(&quot;[ESD]ESD config thread=%p\n&quot;, pgc-&gt;cmdq_handle_config_esd);
-    _primary_path_unlock(__func__);
-
-    /* 1.use cmdq to read from lcm */
-    //发CMDQ_ESD_CHECK_READ的命令读取lcm的寄存器数据，_esd_check_config_handle_vdo函数在下面会讲到
-    if (primary_display_is_video_mode())
-        ret = _esd_check_config_handle_vdo();
-    else
-        ret = _esd_check_config_handle_cmd();
-
-    MMProfileLogEx(ddp_mmp_get_events()-&gt;esd_rdlcm,
-               MMProfileFlagPulse,
-               primary_display_is_video_mode(), 3);
-    if (ret == 1) {
-        /* cmdq fail */
-        if (_need_wait_esd_eof()) {
-            /* Need set esd check eof synctoken to let trigger loop go. */
-            cmdqCoreSetEvent(CMDQ_SYNC_TOKEN_ESD_EOF);
-        }
-        /* do dsi reset */
-        dpmgr_path_build_cmdq(pgc-&gt;dpmgr_handle,
-                      pgc-&gt;cmdq_handle_config_esd,
-                      CMDQ_DSI_RESET, 0);
-        goto destroy_cmdq;
-    }
-
-    DISPCHECK(&quot;[ESD]ESD config thread done~\n&quot;);
-
-    /* 2.check data(*cpu check now) */
-    //发CMDQ_ESD_CHECK_CMP的命令，判断读取到的lcm寄存器数据和lcm驱动中定义的lcm_esd_check_table[i].para_list[0]是否一致
-    ret = dpmgr_path_build_cmdq(pgc-&gt;dpmgr_handle,
-                    pgc-&gt;cmdq_handle_config_esd,
-                    CMDQ_ESD_CHECK_CMP, 0);
-    MMProfileLogEx(ddp_mmp_get_events()-&gt;esd_rdlcm,
-               MMProfileFlagPulse, 0, 4);
-    if (ret)
-        ret = 1;    /* esd check fail */
-</code></pre><p>destroy_cmdq:<br>        dpmgr_path_build_cmdq(pgc-&gt;dpmgr_handle,<br>                      pgc-&gt;cmdq_handle_config_esd,<br>                      CMDQ_ESD_FREE_SLOT, 0);<br>        /<em> 3.destroy esd config thread </em>/<br>        cmdqRecDestroy(pgc-&gt;cmdq_handle_config_esd);<br>        pgc-&gt;cmdq_handle_config_esd = NULL;<br>        /<em> _primary_path_unlock(<strong>func</strong>); </em>/<br>    }<br>……<br>return ret;<br>}</p>
-<p>/<em> For Vdo Mode Read LCM Check </em>/<br>/<em> Config cmdq_handle_config_esd </em>/<br>int _esd_check_config_handle_vdo(void)<br>{<br>    int ret = 0;        /<em> 0:success , 1:fail </em>/</p>
-<pre><code>primary_display_esd_cust_bycmdq(1);
-
-/* 1.reset */
-cmdqRecReset(pgc-&gt;cmdq_handle_config_esd);
-
-/* Lock which is used to avoid esd and suspend affect */
-ret = cmdqRecWait(pgc-&gt;cmdq_handle_config_esd, CMDQ_EVENT_DISP_RDMA0_EOF);
-cmdqRecWait(pgc-&gt;cmdq_handle_config_esd, CMDQ_EVENT_MUTEX0_STREAM_EOF);
-
-_primary_path_lock(__func__);
-
-/* 2.stop dsi vdo mode */
-dpmgr_path_build_cmdq(pgc-&gt;dpmgr_handle, pgc-&gt;cmdq_handle_config_esd,
-              CMDQ_STOP_VDO_MODE, 0);
-
-/* 3.write instruction(read from lcm) */
-//发CMDQ_ESD_CHECK_READ的命令读取lcm的寄存器数据
-dpmgr_path_build_cmdq(pgc-&gt;dpmgr_handle, pgc-&gt;cmdq_handle_config_esd, CMDQ_ESD_CHECK_READ, 0);
-
-/* pull DSI clock lane */
-DSI_sw_clk_trail_cmdq(0, pgc-&gt;cmdq_handle_config_esd);
-DSI_manual_enter_HS(pgc-&gt;cmdq_handle_config_esd);
-
-/* 4.start dsi vdo mode */
-dpmgr_path_build_cmdq(pgc-&gt;dpmgr_handle, pgc-&gt;cmdq_handle_config_esd, CMDQ_START_VDO_MODE, 0);
-
-/* 5. trigger path */
-dpmgr_path_trigger(pgc-&gt;dpmgr_handle, pgc-&gt;cmdq_handle_config_esd,
-           CMDQ_ENABLE);
-
-_primary_path_unlock(__func__);
-
-/* 6.flush instruction */
-dprec_logger_start(DPREC_LOGGER_ESD_CMDQ, 0, 0);
-ret = cmdqRecFlush(pgc-&gt;cmdq_handle_config_esd);
-dprec_logger_done(DPREC_LOGGER_ESD_CMDQ, 0, 0);
-
-DISPCHECK(&quot;[ESD]_esd_check_config_handle_vdo ret=%d\n&quot;, ret);
-
-if (ret)
-    ret = 1;
-
-primary_display_esd_cust_bycmdq(0);
-return ret;
-</code></pre><p>}</p>
-<p>alps/kernel-3.18/drivers/misc/mediatek/video/mt6580/dispsys/ddp_dsi.c<br>int ddp_dsi_build_cmdq(DISP_MODULE_ENUM module, void <em>cmdq_trigger_handle, CMDQ_STATE state)<br>{<br>……<br>    else if (state == CMDQ_ESD_CHECK_READ) {<br>    // 下发CMDQ_ESD_CHECK_READ命令的数据处理<br>        /</em> enable dsi interrupt: RD_RDY/CMD_DONE (need do this here?) */<br>        DSI_OUTREGBIT(cmdq_trigger_handle, struct DSI_INT_ENABLE_REG, DSI_REG[dsi_i]-&gt;DSI_INTEN,<br>                  RD_RDY, 1);<br>        DSI_OUTREGBIT(cmdq_trigger_handle, struct DSI_INT_ENABLE_REG, DSI_REG[dsi_i]-&gt;DSI_INTEN,<br>                  CMD_DONE, 1);</p>
-<pre><code>for (i = 0; i &lt; 3; i++) {
-    if (dsi_params-&gt;lcm_esd_check_table[i].cmd == 0)
-        break;
-
-    /* 0. send read lcm command(short packet) */
-    t0.CONFG = 0x04;    /* /BTA */
-    t0.Data0 = dsi_params-&gt;lcm_esd_check_table[i].cmd;
-    /* / 0xB0 is used to distinguish DCS cmd or Gerneric cmd, is that Right??? */
-    t0.Data_ID =
-        (t0.Data0 &lt;
-         0xB0) ? DSI_DCS_READ_PACKET_ID : DSI_GERNERIC_READ_LONG_PACKET_ID;
-    t0.Data1 = 0;
-
-    /* write DSI CMDQ */
-    DSI_OUTREG32(cmdq_trigger_handle, &amp;DSI_CMDQ_REG[dsi_i]-&gt;data[0],
-             0x00013700);
-    DSI_OUTREG32(cmdq_trigger_handle, &amp;DSI_CMDQ_REG[dsi_i]-&gt;data[1],
-             AS_UINT32(&amp;t0));
-    DSI_OUTREG32(cmdq_trigger_handle, &amp;DSI_REG[dsi_i]-&gt;DSI_CMDQ_SIZE, 2);
-
-    /* start DSI */
-    DSI_OUTREG32(cmdq_trigger_handle, &amp;DSI_REG[dsi_i]-&gt;DSI_START, 0);
-    DSI_OUTREG32(cmdq_trigger_handle, &amp;DSI_REG[dsi_i]-&gt;DSI_START, 1);
-
-    /* 1. wait DSI RD_RDY(must clear, in case of cpu RD_RDY interrupt handler) */
-    if (dsi_i == 0) {
-        DSI_POLLREG32(cmdq_trigger_handle, &amp;DSI_REG[dsi_i]-&gt;DSI_INTSTA,
-                  0x00000001, 0x1);
-        DSI_OUTREGBIT(cmdq_trigger_handle, struct DSI_INT_STATUS_REG,
-                  DSI_REG[dsi_i]-&gt;DSI_INTSTA, RD_RDY, 0x0);
-    }
-</code></pre><p>#if 0<br>            else {    /<em> DSI1 </em>/</p>
-<pre><code>    DSI_POLLREG32(cmdq_trigger_handle, &amp;DSI_REG[dsi_i]-&gt;DSI_INTSTA,
-              0x00000001, 0x1);
-    DSI_OUTREGBIT(cmdq_trigger_handle, struct DSI_INT_STATUS_REG,
-              DSI_REG[dsi_i]-&gt;DSI_INTSTA, RD_RDY, 0x0);
-}
-</code></pre><p>#endif<br>            /<em> 2. save RX data </em>/<br>            if (hSlot) {<br>                DSI_BACKUPREG32(cmdq_trigger_handle,<br>                        hSlot, i <em> 4 + 0, &amp;DSI_REG[0]-&gt;DSI_RX_DATA0);<br>                DSI_BACKUPREG32(cmdq_trigger_handle,<br>                        hSlot, i </em> 4 + 1, &amp;DSI_REG[0]-&gt;DSI_RX_DATA1);<br>                DSI_BACKUPREG32(cmdq_trigger_handle,<br>                        hSlot, i <em> 4 + 2, &amp;DSI_REG[0]-&gt;DSI_RX_DATA2);<br>                DSI_BACKUPREG32(cmdq_trigger_handle,<br>                        hSlot, i </em> 4 + 3, &amp;DSI_REG[0]-&gt;DSI_RX_DATA3);<br>            }</p>
-<pre><code>/* 3. write RX_RACK */
-DSI_OUTREGBIT(cmdq_trigger_handle, struct DSI_RACK_REG, DSI_REG[dsi_i]-&gt;DSI_RACK,
-          DSI_RACK, 1);
-
-/* 4. polling not busy(no need clear) */
-if (dsi_i == 0) {
-    DSI_POLLREG32(cmdq_trigger_handle, &amp;DSI_REG[dsi_i]-&gt;DSI_INTSTA,
-              0x80000000, 0);
-}
-</code></pre><p>#if 0<br>            else {    /<em> DSI1 </em>/</p>
-<pre><code>    DSI_POLLREG32(cmdq_trigger_handle, &amp;DSI_REG[dsi_i]-&gt;DSI_INTSTA,
-              0x80000000, 0);
-}
-</code></pre><p>#endif<br>            /<em> loop: 0~4 </em>/<br>        }</p>
-<pre><code>    /* DSI_OUTREGBIT(cmdq_trigger_handle, DSI_INT_ENABLE_REG,DSI_REG[dsi_i]-&gt;DSI_INTEN,RD_RDY,0); */
-} else if (state == CMDQ_ESD_CHECK_CMP) {
-// 下发CMDQ_ESD_CHECK_READ命令的数据处理
-
-    DISPCHECK(&quot;[DSI]enter cmp\n&quot;);
-    /* cmp just once and only 1 return value */
-    for (i = 0; i &lt; 3; i++) {
-        if (dsi_params-&gt;lcm_esd_check_table[i].cmd == 0)
-            break;
-
-        DISPCHECK(&quot;[DSI]enter cmp i=%d\n&quot;, i);
-
-        /* read data */
-        if (hSlot) {
-            /* read from slot */
-            cmdqBackupReadSlot(hSlot, i * 4 + 0, ((uint32_t *)&amp;read_data0));
-            cmdqBackupReadSlot(hSlot, i * 4 + 1, ((uint32_t *)&amp;read_data1));
-            cmdqBackupReadSlot(hSlot, i * 4 + 2, ((uint32_t *)&amp;read_data2));
-            cmdqBackupReadSlot(hSlot, i * 4 + 3, ((uint32_t *)&amp;read_data3));
-        } else {
-            /* read from dsi , support only one cmd read */
-            if (i == 0) {
-                DSI_OUTREG32(NULL, &amp;read_data0,
-                        AS_UINT32(&amp;DSI_REG[dsi_i]-&gt;DSI_RX_DATA0));
-                DSI_OUTREG32(NULL, &amp;read_data1,
-                        AS_UINT32(&amp;DSI_REG[dsi_i]-&gt;DSI_RX_DATA1));
-                DSI_OUTREG32(NULL, &amp;read_data2,
-                        AS_UINT32(&amp;DSI_REG[dsi_i]-&gt;DSI_RX_DATA2));
-                DSI_OUTREG32(NULL, &amp;read_data3,
-                        AS_UINT32(&amp;DSI_REG[dsi_i]-&gt;DSI_RX_DATA3));
-            }
-        }
-
-        MMProfileLogEx(ddp_mmp_get_events()-&gt;esd_rdlcm, MMProfileFlagPulse,
-                   AS_UINT32(&amp;read_data0),
-                   AS_UINT32(&amp;(dsi_params-&gt;lcm_esd_check_table[i])));
-
-        DISPDBG(&quot;[DSI]enter cmp read_data0 byte0=0x%x byte1=0x%x byte2=0x%x byte3=0x%x\n&quot;,
-            read_data0.byte0,
-            read_data0.byte1,
-            read_data0.byte2,
-            read_data0.byte3);
-        DISPDBG
-            (&quot;[DSI]enter cmp check_table cmd=0x%x,count=0x%x,para_list[0]=0x%x,para_list[1]=0x%x\n&quot;,
-             dsi_params-&gt;lcm_esd_check_table[i].cmd,
-             dsi_params-&gt;lcm_esd_check_table[i].count,
-             dsi_params-&gt;lcm_esd_check_table[i].para_list[0],
-             dsi_params-&gt;lcm_esd_check_table[i].para_list[1]);
-        DISPDBG(&quot;[DSI]enter cmp DSI+0x200=0x%x\n&quot;,
-            AS_UINT32(DDP_REG_BASE_DSI0 + 0x200));
-        DISPDBG(&quot;[DSI]enter cmp DSI+0x204=0x%x\n&quot;,
-            AS_UINT32(DDP_REG_BASE_DSI0 + 0x204));
-        DISPDBG(&quot;[DSI]enter cmp DSI+0x60=0x%x\n&quot;,
-            AS_UINT32(DDP_REG_BASE_DSI0 + 0x60));
-        DISPDBG(&quot;[DSI]enter cmp DSI+0x74=0x%x\n&quot;,
-            AS_UINT32(DDP_REG_BASE_DSI0 + 0x74));
-        DISPDBG(&quot;[DSI]enter cmp DSI+0x88=0x%x\n&quot;,
-            AS_UINT32(DDP_REG_BASE_DSI0 + 0x88));
-        DISPDBG(&quot;[DSI]enter cmp DSI+0x0c=0x%x\n&quot;,
-            AS_UINT32(DDP_REG_BASE_DSI0 + 0x0c));
-
-        /* 0x02: acknowledge &amp; error report */
-        /* 0x11: generic short read response(1 byte return) */
-        /* 0x12: generic short read response(2 byte return) */
-        /* 0x1a: generic long read response */
-        /* 0x1c: dcs long read response */
-        /* 0x21: dcs short read response(1 byte return) */
-        /* 0x22: dcs short read response(2 byte return) */
-        //根据读取到read_data0.byte0的值，来判断lcm发过来的是什么类型的数据包，进行相应的判断处理
-        packet_type = read_data0.byte0;
-
-        if (packet_type == 0x1A || packet_type == 0x1C) {
-            recv_data_cnt = read_data0.byte1 + read_data0.byte2 * 16;
-            if (recv_data_cnt &gt; 2) {
-                DISPCHECK
-                (&quot;Set receive data count from %d to 2 as ESD check supported max data count.\n&quot;,
-                    recv_data_cnt);
-                recv_data_cnt = 2;
-            }
-            if (recv_data_cnt &gt; dsi_params-&gt;lcm_esd_check_table[i].count) {
-                DISPCHECK
-                (&quot;Set receive data count from %d to %d as ESD check table specified.\n&quot;,
-                        recv_data_cnt, dsi_params-&gt;lcm_esd_check_table[i].count);
-                recv_data_cnt = dsi_params-&gt;lcm_esd_check_table[i].count;
-            }
-            DISPCHECK(&quot;DSI read long packet size: %d\n&quot;, recv_data_cnt);
-            //比较这种lcm中配置的lcm_esd_check_table[i].para_list[0]值和read_data1.byte0的值是否一致
-            result = memcmp((void *)&amp;(dsi_params-&gt;lcm_esd_check_table[i].para_list[0]),
-                (void *)&amp;read_data1, recv_data_cnt);
-        } else if (packet_type == 0x11 ||
-               packet_type == 0x12 ||
-               packet_type == 0x21 ||
-               packet_type == 0x22) {
-            /* short read response */
-            if (packet_type == 0x11 || packet_type == 0x21)
-                recv_data_cnt = 1;
-            else
-                recv_data_cnt = 2;
-
-            if (recv_data_cnt &gt; dsi_params-&gt;lcm_esd_check_table[i].count) {
-                DISPCHECK
-                (&quot;Set receive data count from %d to %d as ESD check table specified.\n&quot;,
-                    recv_data_cnt, dsi_params-&gt;lcm_esd_check_table[i].count);
-                recv_data_cnt = dsi_params-&gt;lcm_esd_check_table[i].count;
-            }
-            DISPCHECK(&quot;DSI read short packet size: %d\n&quot;, recv_data_cnt);
-            //比较这种lcm中配置的lcm_esd_check_table[i].para_list[0]值和read_data0.byte1的值是否一致
-            result = memcmp((void *)&amp;(dsi_params-&gt;lcm_esd_check_table[i].para_list[0]),
-                    (void *)&amp;read_data0.byte1, recv_data_cnt);
-        } else if (packet_type == 0x02) {
-            DISPCHECK(&quot;read return type is 0x02\n&quot;);
-            result = 1;
-        } else {
-            DISPCHECK(&quot;read return type is non-recognite, type = 0x%x\n&quot;, packet_type);
-            result = 1;
-        }
-
-        if (result == 0) {
-            /* clear rx data */
-            /* DSI_OUTREG32(NULL, &amp;DSI_REG[dsi_i]-&gt;DSI_RX_DATA0,0); */
-            // result等于0的话，esd是ok的，不会进行recovery的动作
-            ret = 0; /* esd pass */
-        } else {
-            // result等于1的话，esd是fail的，会进行recovery的动作
-            ret = 1; /* esd fail */
-            break;
-        }
-    }
-
-}
-</code></pre><p>……<br>}</p>
-<p>alps/kernel-3.18/drivers/misc/mediatek/video/mt6580/videox/primary_display.c<br>/<em> ESD RECOVERY </em>/<br>int primary_display_esd_recovery(void)<br>{<br>……<br>//重新初始化显示屏参数<br>    disp_lcm_init(pgc-&gt;plcm, 1);<br>……<br>}</p>
-<p>alps/kernel-3.18/drivers/misc/mediatek/video/mt6580/videox/disp_lcm.c<br>int disp_lcm_init(disp_lcm_handle <em>plcm, int force)<br>{<br>        LCM_DRIVER </em>lcm_drv = NULL;</p>
-<pre><code>DISPFUNC();
-if (_is_lcm_inited(plcm)) {
-        lcm_drv = plcm-&gt;drv;
-
-        if (lcm_drv-&gt;init_power) {
-                if (!disp_lcm_is_inited(plcm) || force) {
-                        DISPMSG(&quot;lcm init power()\n&quot;);
-                        lcm_drv-&gt;init_power();
-                }
-        }
-
-        if (lcm_drv-&gt;init) {
-                if (!disp_lcm_is_inited(plcm) || force) {
-                        DISPMSG(&quot;lcm init()\n&quot;);
-                        //这里就是调用到lcm的static void lcm_init(void)函数
-                        lcm_drv-&gt;init();
-                }
-        } else {
-                DISPERR(&quot;FATAL ERROR, lcm_drv-&gt;init is null\n&quot;);
-                return -1;
-        }
-
-        return 0;
-}
-
-DISPERR(&quot;plcm is null\n&quot;);
-return -1;
-</code></pre><p>}</p>
-<p>三．读寄存器方式做ESD检测，目前只支持读取三个寄存器，各个寄存器只能够识别返回一个值。（只能够识别屏端返回的短包），如果需要识别返回多个值，可以做如下修改<br>（1）<br>alps/kernel-3.18/drivers/misc/mediatek/lcm/inc/lcm_drv.h</p>
-<p>#define RT_MAX_NUM 10 //该值不可以修改，最大只支持10个返回值</p>
-<p>#define ESD_CHECK_NUM 3 //该值表示目前最多可以读取的寄存器个数，尽量不要修改，修改成越大，esc check的负载越重，系统运行时更慢<br>typedef struct {<br>        unsigned char cmd;<br>        unsigned char count;<br>        unsigned char para_list[RT_MAX_NUM];<br>} LCM_esd_check_item;<br>typedef struct {<br>……<br>        LCM_esd_check_item lcm_esd_check_table[ESD_CHECK_NUM];<br>……<br>} LCM_DSI_PARAMS;</p>
-<p>（2）<br>alps/kernel-3.18/drivers/misc/mediatek/lcm/xxx/xxx.c<br>alps/vendor/mediatek/proprietary/bootable/bootloader/lk/dev/lcm/xxx/xxx.c<br>static void lcm_get_params(LCM_PARAMS *params)<br>{<br>……<br>        //配置三个lcm的寄存器地址，每个寄存器配置10个值，如下，寄存器的值要配置正确，否则会不断地esd recovery<br>params-&gt;dsi.esd_check_enable = 1;<br>        params-&gt;dsi.customization_esd_check_enable = 1;</p>
-<pre><code>params-&gt;dsi.lcm_esd_check_table[0].cmd = 0xBa;
-params-&gt;dsi.lcm_esd_check_table[0].count = 10; 
-params-&gt;dsi.lcm_esd_check_table[0].para_list[0] = 0x32;
-params-&gt;dsi.lcm_esd_check_table[0].para_list[1] = 0x81;
-params-&gt;dsi.lcm_esd_check_table[0].para_list[2] = 0x05;
-params-&gt;dsi.lcm_esd_check_table[0].para_list[3] = 0xF9;
-params-&gt;dsi.lcm_esd_check_table[0].para_list[4] = 0x0e;
-params-&gt;dsi.lcm_esd_check_table[0].para_list[5] = 0x0e;
-params-&gt;dsi.lcm_esd_check_table[0].para_list[6] = 0x02;
-params-&gt;dsi.lcm_esd_check_table[0].para_list[7] = 0x00;
-params-&gt;dsi.lcm_esd_check_table[0].para_list[8] = 0x00;
-params-&gt;dsi.lcm_esd_check_table[0].para_list[9] = 0x00;
-
-params-&gt;dsi.lcm_esd_check_table[1].cmd = 0xc1;
-params-&gt;dsi.lcm_esd_check_table[1].count = 10; 
-params-&gt;dsi.lcm_esd_check_table[1].para_list[0] = 0x54;
-params-&gt;dsi.lcm_esd_check_table[1].para_list[1] = 0x00;
-params-&gt;dsi.lcm_esd_check_table[1].para_list[2] = 0x1E;
-params-&gt;dsi.lcm_esd_check_table[1].para_list[3] = 0x1E;
-params-&gt;dsi.lcm_esd_check_table[1].para_list[4] = 0x77;
-params-&gt;dsi.lcm_esd_check_table[1].para_list[5] = 0xF1;
-params-&gt;dsi.lcm_esd_check_table[1].para_list[6] = 0xFF;
-params-&gt;dsi.lcm_esd_check_table[1].para_list[7] = 0xFF;
-params-&gt;dsi.lcm_esd_check_table[1].para_list[8] = 0xCC;
-params-&gt;dsi.lcm_esd_check_table[1].para_list[9] = 0xCC;
-
-params-&gt;dsi.lcm_esd_check_table[2].cmd = 0xe9;
-params-&gt;dsi.lcm_esd_check_table[2].count = 10; 
-params-&gt;dsi.lcm_esd_check_table[2].para_list[0] = 0x02;
-params-&gt;dsi.lcm_esd_check_table[2].para_list[1] = 0x00;
-params-&gt;dsi.lcm_esd_check_table[2].para_list[2] = 0x10;
-params-&gt;dsi.lcm_esd_check_table[2].para_list[3] = 0x05;
-params-&gt;dsi.lcm_esd_check_table[2].para_list[4] = 0x16;
-params-&gt;dsi.lcm_esd_check_table[2].para_list[5] = 0x0A;
-params-&gt;dsi.lcm_esd_check_table[2].para_list[6] = 0xA0;
-params-&gt;dsi.lcm_esd_check_table[2].para_list[7] = 0x12;
-params-&gt;dsi.lcm_esd_check_table[2].para_list[8] = 0x31;
-params-&gt;dsi.lcm_esd_check_table[2].para_list[9] = 0x23;
-</code></pre><p>}</p>
-<p>（3）<br>alps/kernel-3.18/drivers/misc/mediatek/video/mt6735/ddp_dsi.c<br>int ddp_dsi_build_cmdq(DISP_MODULE_ENUM module, void <em>cmdq_trigger_handle, CMDQ_STATE state)<br>{<br>    int ret = 0, result = 0;<br>    int i = 0, j = 0;<br>    int dsi_i = 0;<br>    LCM_DSI_PARAMS </em>dsi_params = NULL;<br>    DSI_T0_INS t0, t1;<br>    struct DSI_RX_DATA_REG read_data0,read_data1,read_data2,read_data3;<br>    unsigned char buffer[20];<br>    uint32_t recv_data_cnt;<br>    unsigned char packet_type;<br>    unsigned int h = 0;</p>
-<pre><code>static cmdqBackupSlotHandle hSlot[4] = {0, 0, 0, 0};
-
-if (DISP_MODULE_DSIDUAL == module)
-    dsi_i = 0;
-else
-    dsi_i = DSI_MODULE_to_ID(module);
-
-dsi_params = &amp;_dsi_context[dsi_i].dsi_params;
-
-if (cmdq_trigger_handle == NULL) {
-    DISPMSG(&quot;cmdq_trigger_handle is NULL\n&quot;);
-    return -1;
-}
-
-if (state == CMDQ_BEFORE_STREAM_SOF) {
-    /* need waiting te */
-    if (module == DISP_MODULE_DSI0) {
-        if (dsi0_te_enable == 0)
-            return 0;
-</code></pre><p>#ifndef MTK_FB_CMDQ_DISABLE<br>            ret =<br>                cmdqRecClearEventToken(cmdq_trigger_handle, CMDQ_EVENT_DSI_TE);<br>            ret = cmdqRecWait(cmdq_trigger_handle, CMDQ_EVENT_DSI_TE);</p>
-<p>#endif<br>        }</p>
-<p>#if 0<br>        else if (module == DISP_MODULE_DSI1) {<br>            if (dsi1_te_enable == 0)<br>                return 0;</p>
-<pre><code>    ret =
-        cmdqRecClearEventToken(cmdq_trigger_handle,
-                   CMDQ_EVENT_MDP_DSI1_TE_SOF);
-    ret = cmdqRecWait(cmdq_trigger_handle, CMDQ_EVENT_MDP_DSI1_TE_SOF);
-} else if (module == DISP_MODULE_DSIDUAL) {
-    if (dsidual_te_enable == 0)
-        return 0;
-
-    /* TODO: dsi 8 lane do not use te???? */
-    /* ret = cmdqRecWait(cmdq_trigger_handle, CMDQ_EVENT_MDP_DSI0_TE_SOF); */
-}
-</code></pre><p>#endif<br>        else {<br>            DISPERR(“wrong module: %s\n”, ddp_get_module_name(module));<br>            return -1;<br>        }<br>    } else if (state == CMDQ_CHECK_IDLE_AFTER_STREAM_EOF) {<br>        /<em> need waiting te </em>/<br>        if (module == DISP_MODULE_DSI0) {<br>            DSI_POLLREG32(cmdq_trigger_handle, &amp;DSI_REG[dsi_i]-&gt;DSI_INTSTA,<br>                      0x80000000, 0);<br>        }</p>
-<p>#if 0<br>        else if (module == DISP_MODULE_DSI1) {<br>            DSI_POLLREG32(cmdq_trigger_handle, &amp;DSI_REG[dsi_i]-&gt;DSI_INTSTA,<br>                      0x80000000, 0);<br>        } else if (module == DISP_MODULE_DSIDUAL) {<br>            DSI_POLLREG32(cmdq_trigger_handle, &amp;DSI_REG[0]-&gt;DSI_INTSTA,<br>                      0x80000000, 0);<br>            DSI_POLLREG32(cmdq_trigger_handle, &amp;DSI_REG[1]-&gt;DSI_INTSTA,<br>                      0x80000000, 0);<br>        }</p>
-<p>#endif<br>        else {<br>            DISPERR(“wrong module: %s\n”, ddp_get_module_name(module));<br>            return -1;<br>        }<br>    } else if (state == CMDQ_ESD_CHECK_READ) {<br>        /<em> enable dsi interrupt: RD_RDY/CMD_DONE (need do this here?) </em>/<br>        DSI_OUTREGBIT(cmdq_trigger_handle, struct DSI_INT_ENABLE_REG,<br>                  DSI_REG[dsi_i]-&gt;DSI_INTEN, RD_RDY, 1);<br>        DSI_OUTREGBIT(cmdq_trigger_handle, struct DSI_INT_ENABLE_REG,<br>                  DSI_REG[dsi_i]-&gt;DSI_INTEN, CMD_DONE, 1);</p>
-<pre><code>for (i = 0; i &lt; 3; i++) {
-    if (dsi_params-&gt;lcm_esd_check_table[i].cmd == 0)
-        break;
-
-    /* 0. send read lcm command(short packet) */
-    t0.CONFG = 0x04;    /* BTA */
-    t0.Data0 = dsi_params-&gt;lcm_esd_check_table[i].cmd;
-    /* / 0xB0 is used to distinguish DCS cmd or Gerneric cmd, is that Right??? */
-    t0.Data_ID =
-        (t0.Data0 &lt;
-         0xB0) ? DSI_DCS_READ_PACKET_ID :
-        DSI_GERNERIC_READ_LONG_PACKET_ID;
-    t0.Data1 = 0;
-
-    t1.CONFG = 0x00;
-    t1.Data0 = dsi_params-&gt;lcm_esd_check_table[i].count;
-    t1.Data1 = 0x00;
-    t1.Data_ID = 0x37;
-
-    /* write DSI CMDQ */
-    DSI_OUTREG32(cmdq_trigger_handle, &amp;DSI_CMDQ_REG[dsi_i]-&gt;data[0],
-             AS_UINT32(&amp;t1));
-    DSI_OUTREG32(cmdq_trigger_handle, &amp;DSI_CMDQ_REG[dsi_i]-&gt;data[1],
-             AS_UINT32(&amp;t0));
-    DSI_OUTREG32(cmdq_trigger_handle, &amp;DSI_REG[dsi_i]-&gt;DSI_CMDQ_SIZE,
-             2);
-
-    /* start DSI */
-    DSI_OUTREG32(cmdq_trigger_handle, &amp;DSI_REG[dsi_i]-&gt;DSI_START, 0);
-    DSI_OUTREG32(cmdq_trigger_handle, &amp;DSI_REG[dsi_i]-&gt;DSI_START, 1);
-
-    /* 1. wait DSI RD_RDY(must clear, in case of cpu RD_RDY interrupt handler) */
-    if (dsi_i == 0) {    /* DSI0 */
-        DSI_POLLREG32(cmdq_trigger_handle,
-                  &amp;DSI_REG[dsi_i]-&gt;DSI_INTSTA, 0x00000001, 0x1);
-        DSI_OUTREGBIT(cmdq_trigger_handle, struct DSI_INT_STATUS_REG,
-                  DSI_REG[dsi_i]-&gt;DSI_INTSTA, RD_RDY, 0);
-    }
-</code></pre><p>#if 0<br>            else {    /<em> DSI1 </em>/<br>                DSI_POLLREG32(cmdq_trigger_handle,<br>                          &amp;DSI_REG[dsi_i]-&gt;DSI_INTSTA, 0x00000001, 0x1);<br>                DSI_OUTREGBIT(cmdq_trigger_handle, struct DSI_INT_STATUS_REG,<br>                          DSI_REG[dsi_i]-&gt;DSI_INTSTA, RD_RDY, 0);<br>            }</p>
-<p>#endif<br>            /<em> 2. save RX data </em>/<br>            if (hSlot[0] &amp;&amp; hSlot[1] &amp;&amp; hSlot[2] &amp;&amp; hSlot[3]) {<br>                DSI_BACKUPREG32(cmdq_trigger_handle, hSlot[0], i,<br>                &amp;DSI_REG[0]-&gt;DSI_RX_DATA0);<br>                DSI_BACKUPREG32(cmdq_trigger_handle, hSlot[1], i,<br>                &amp;DSI_REG[0]-&gt;DSI_RX_DATA1);<br>                DSI_BACKUPREG32(cmdq_trigger_handle, hSlot[2], i,<br>                &amp;DSI_REG[0]-&gt;DSI_RX_DATA2);<br>                DSI_BACKUPREG32(cmdq_trigger_handle, hSlot[3], i,<br>                &amp;DSI_REG[0]-&gt;DSI_RX_DATA3);<br>            } </p>
-<pre><code>/* 3. write RX_RACK */
-DSI_OUTREGBIT(cmdq_trigger_handle, struct DSI_RACK_REG,
-          DSI_REG[dsi_i]-&gt;DSI_RACK, DSI_RACK, 1);
-
-/* 4. polling not busy(no need clear) */
-if (dsi_i == 0) {    /* DSI0 */
-    DSI_POLLREG32(cmdq_trigger_handle,
-              &amp;DSI_REG[dsi_i]-&gt;DSI_INTSTA, 0x80000000, 0);
-}
-</code></pre><p>#if 0<br>            else {    /<em> DSI1 </em>/<br>                DSI_POLLREG32(cmdq_trigger_handle,<br>                          &amp;DSI_REG[dsi_i]-&gt;DSI_INTSTA, 0x80000000, 0);<br>            }</p>
-<p>#endif<br>            /<em> loop: 0~4 </em>/<br>        }</p>
-<pre><code>    /* DSI_OUTREGBIT(cmdq_trigger_handle, struct DSI_INT_ENABLE_REG,DSI_REG[dsi_i]-&gt;DSI_INTEN,RD_RDY,0); */
-} else if (state == CMDQ_ESD_CHECK_CMP) {
-
-    DISPMSG(&quot;[DSI]enter cmp\n&quot;);
-    /* cmp just once and only 1 return value */
-    for (i = 0; i &lt; 3; i++) {
-        if (dsi_params-&gt;lcm_esd_check_table[i].cmd == 0)
-            break;
-
-        DISPMSG(&quot;[DSI]enter cmp i=%d\n&quot;, i);
-
-        /* read data */
-        if (hSlot[0] &amp;&amp; hSlot[1] &amp;&amp; hSlot[2] &amp;&amp; hSlot[3]) {
-            /* read from slot */
-            cmdqBackupReadSlot(hSlot[0], i, ((uint32_t *)&amp;read_data0));
-            cmdqBackupReadSlot(hSlot[1], i, ((uint32_t *)&amp;read_data1));
-            cmdqBackupReadSlot(hSlot[2], i, ((uint32_t *)&amp;read_data2));
-            cmdqBackupReadSlot(hSlot[3], i, ((uint32_t *)&amp;read_data3)); 
-        } else {
-            /* read from dsi , support only one cmd read */
-            if (i == 0) {
-                DSI_OUTREG32(NULL, &amp;read_data0,AS_UINT32(&amp;DSI_REG[dsi_i]-&gt;DSI_RX_DATA0));
-                DSI_OUTREG32(NULL, &amp;read_data1,AS_UINT32(&amp;DSI_REG[dsi_i]-&gt;DSI_RX_DATA1));
-                DSI_OUTREG32(NULL, &amp;read_data2,AS_UINT32(&amp;DSI_REG[dsi_i]-&gt;DSI_RX_DATA2));
-                DSI_OUTREG32(NULL, &amp;read_data3,AS_UINT32(&amp;DSI_REG[dsi_i]-&gt;DSI_RX_DATA3));
-            }
-        }
-
-        MMProfileLogEx(ddp_mmp_get_events()-&gt;esd_rdlcm, MMProfileFlagPulse,
-                   AS_UINT32(&amp;read_data0),
-                   AS_UINT32(&amp;(dsi_params-&gt;lcm_esd_check_table[i])));
-
-        DISPDBG
-            (&quot;[DSI]enter cmp read_data0 byte0=0x%x byte1=0x%x byte2=0x%x byte3=0x%x\n&quot;,
-             read_data0.byte0, read_data0.byte1, read_data0.byte2,
-             read_data0.byte3);
-        DISPDBG
-            (&quot;[DSI]cmp check_table cmd=0x%x,count=0x%x,para_list[0]=0x%x,para_list[1]=0x%x\n&quot;,
-             dsi_params-&gt;lcm_esd_check_table[i].cmd,
-             dsi_params-&gt;lcm_esd_check_table[i].count,
-             dsi_params-&gt;lcm_esd_check_table[i].para_list[0],
-             dsi_params-&gt;lcm_esd_check_table[i].para_list[1]);
-        DISPDBG(&quot;[DSI]enter cmp DSI+0x200=0x%x\n&quot;,
-            AS_UINT32(DDP_REG_BASE_DSI0 + 0x200));
-        DISPDBG(&quot;[DSI]enter cmp DSI+0x204=0x%x\n&quot;,
-            AS_UINT32(DDP_REG_BASE_DSI0 + 0x204));
-        DISPDBG(&quot;[DSI]enter cmp DSI+0x60=0x%x\n&quot;,
-            AS_UINT32(DDP_REG_BASE_DSI0 + 0x60));
-        DISPDBG(&quot;[DSI]enter cmp DSI+0x74=0x%x\n&quot;,
-            AS_UINT32(DDP_REG_BASE_DSI0 + 0x74));
-        DISPDBG(&quot;[DSI]enter cmp DSI+0x88=0x%x\n&quot;,
-            AS_UINT32(DDP_REG_BASE_DSI0 + 0x88));
-        DISPDBG(&quot;[DSI]enter cmp DSI+0x0c=0x%x\n&quot;,
-            AS_UINT32(DDP_REG_BASE_DSI0 + 0x0c));
-
-        /* 0x02: acknowledge &amp; error report */
-        /* 0x11: generic short read response(1 byte return) */
-        /* 0x12: generic short read response(2 byte return) */
-        /* 0x1a: generic long read response */
-        /* 0x1c: dcs long read response */
-        /* 0x21: dcs short read response(1 byte return) */
-        /* 0x22: dcs short read response(2 byte return) */
-        packet_type = read_data0.byte0;
-
-        if (packet_type == 0x1A || packet_type == 0x1C) {
-            recv_data_cnt = read_data0.byte1 + read_data0.byte2 * 16;
-            DISPDBG(&quot;packet_type=0x%x,recv_data_cnt = %d\n&quot;, packet_type, recv_data_cnt);
-            if(recv_data_cnt &gt; RT_MAX_NUM)
-            {
-                DISPMSG(&quot;DSI read long packet data exceeds 10 bytes \n&quot;);
-                recv_data_cnt = RT_MAX_NUM;
-            } 
-
-            if (recv_data_cnt &gt; dsi_params-&gt;lcm_esd_check_table[i].count) {
-                recv_data_cnt = dsi_params-&gt;lcm_esd_check_table[i].count;
-            }
-
-            if (recv_data_cnt &lt;= 4) {
-                memcpy((void *)buffer, (void *)&amp;read_data1, recv_data_cnt);
-            } else if (recv_data_cnt &lt;= 8) {
-                memcpy((void *)buffer, (void *)&amp;read_data1, 4);
-                memcpy((void *)(buffer + 4), (void *)&amp;read_data2, recv_data_cnt - 4);
-            } else {
-                memcpy((void *)buffer, (void *)&amp;read_data1, 4);
-                memcpy((void *)(buffer + 4), (void *)&amp;read_data2, 4);
-                memcpy((void *)(buffer + 8), (void *)&amp;read_data3, recv_data_cnt - 8);
-            }
-
-            for (j = 0; j &lt; recv_data_cnt; j++) {
-                DISPDBG(&quot;buffer[%d]=0x%x\n&quot;, j, buffer[j]);
-                if (buffer[j] != dsi_params-&gt;lcm_esd_check_table[i].para_list[j]) {
-                    result= 1;
-                    DISPMSG(&quot;[ESD]CMP i %d return value 0x%x,para_list[%d]=0x%x\n&quot;, i,
-                    buffer[j], j, dsi_params-&gt;lcm_esd_check_table[i].para_list[j]);
-                    break;
-                }
-            }
-        } else if (packet_type == 0x11 ||
-        packet_type == 0x12 ||
-        packet_type == 0x21 ||
-        packet_type == 0x22) {
-            /* short read response */
-            if (packet_type == 0x11 || packet_type == 0x21)
-                recv_data_cnt = 1;
-            else
-                recv_data_cnt = 2;
-
-            if (recv_data_cnt &gt; dsi_params-&gt;lcm_esd_check_table[i].count) {
-                recv_data_cnt = dsi_params-&gt;lcm_esd_check_table[i].count;
-            }
-
-            memcpy((void *)buffer, (void *)&amp;read_data0.byte1, recv_data_cnt);
-            DISPDBG(&quot;packet_type=0x%x,recv_data_cnt = %d\n&quot;, packet_type, recv_data_cnt);
-
-            for (j = 0; j &lt; recv_data_cnt; j++) {
-                DISPDBG(&quot;buffer[%d]=0x%x\n&quot;, j, buffer[j]);
-                if (buffer[j] != dsi_params-&gt;lcm_esd_check_table[i].para_list[j]) {
-                    result= 1;
-                    DISPMSG(&quot;[ESD]CMP i %d return value 0x%x,para_list[%d]=0x%x\n&quot;, i,
-                    buffer[j], j, dsi_params-&gt;lcm_esd_check_table[i].para_list[j]);
-                    break;
-                }
-            }
-        } else if (packet_type == 0x02) {
-            DISPMSG(&quot;read return type is 0x02\n&quot;);
-            result = 1;
-        } else {
-            DISPMSG(&quot;read return type is non-recognite, type = 0x%x\n&quot;, packet_type);
-            result = 1;
-        }
-
-        if (result == 0) {
-            /* clear rx data */
-            /* DSI_OUTREG32(NULL, &amp;DSI_REG[dsi_i]-&gt;DSI_RX_DATA0,0); */
-            ret = 0; /* esd pass */
-        } else {
-            ret = 1; /* esd fail */
-            break;
-        }
-    }
-
-} else if (state == CMDQ_ESD_ALLC_SLOT) {
-    /* create 3*4 slot */
-    for(h = 0; h &lt; 4; h++){
-        cmdqBackupAllocateSlot(&amp;hSlot[h], 3);
-    }
-} else if (state == CMDQ_ESD_FREE_SLOT) {
-    if (hSlot[0] &amp;&amp; hSlot[1] &amp;&amp; hSlot[2] &amp;&amp; hSlot[3]) {
-        for(h = 0; h &lt; 4; h++){
-            cmdqBackupFreeSlot(hSlot[h]);
-            hSlot[h] = 0;
-        }
-    }
-} else if (state == CMDQ_STOP_VDO_MODE) {
-    /* use cmdq to stop dsi vdo mode */
-    /* -1. stop TE_RDY IRQ */
-    DSI_OUTREGBIT(cmdq_trigger_handle, struct DSI_INT_ENABLE_REG,
-              DSI_REG[i]-&gt;DSI_INTEN, TE_RDY, 0);
-
-    /* 0. set dsi cmd mode */
-    DSI_SetMode(module, cmdq_trigger_handle, CMD_MODE);
-
-    /* 1. polling dsi not busy */
-    i = DSI_MODULE_BEGIN(module);
-    if (i == 0) {
-        /* DSI0/DUAL */
-        /* polling vm done */
-        /* polling dsi busy */
-        DSI_POLLREG32(cmdq_trigger_handle, &amp;DSI_REG[i]-&gt;DSI_INTSTA,
-                  0x80000000, 0);
-</code></pre><p>#if 0<br>            i = DSI_MODULE_END(module);<br>            if (i == 1) {    /<em> DUAL </em>/<br>                DSI_POLLREG32(cmdq_trigger_handle, &amp;DSI_REG[i]-&gt;DSI_INTSTA,<br>                          0x80000000, 0);<br>            }</p>
-<p>#endif<br>        }</p>
-<p>#if 0<br>        else {    /<em> DSI1 </em>/<br>            DSI_POLLREG32(cmdq_trigger_handle, &amp;DSI_REG[i]-&gt;DSI_INTSTA,<br>                      0x80000000, 0);<br>        }</p>
-<p>#endif<br>        /<em> 2.dual dsi need do reset DSI_DUAL_EN/DSI_START </em>/<br>        if (module == DISP_MODULE_DSIDUAL) {<br>            DSI_OUTREGBIT(cmdq_trigger_handle, struct DSI_COM_CTRL_REG,<br>                      DSI_REG[0]-&gt;DSI_COM_CTRL, DSI_DUAL_EN, 0);<br>            DSI_OUTREGBIT(cmdq_trigger_handle, struct DSI_COM_CTRL_REG,<br>                      DSI_REG[1]-&gt;DSI_COM_CTRL, DSI_DUAL_EN, 0);<br>            DSI_OUTREGBIT(cmdq_trigger_handle, struct DSI_START_REG,<br>                      DSI_REG[0]-&gt;DSI_START, DSI_START, 0);<br>            DSI_OUTREGBIT(cmdq_trigger_handle, struct DSI_START_REG,<br>                      DSI_REG[1]-&gt;DSI_START, DSI_START, 0);<br>        }<br>        /<em> 3.disable HS </em>/<br>        /<em> DSI_clk_HS_mode(module, cmdq_trigger_handle, false); </em>/</p>
-<pre><code>} else if (state == CMDQ_START_VDO_MODE) {
-
-    /* 0. dual dsi set DSI_START/DSI_DUAL_EN */
-    if (module == DISP_MODULE_DSIDUAL) {
-        /* must set DSI_START to 0 before set dsi_dual_en, don&apos;t know why.2014.02.15 */
-        DSI_OUTREGBIT(cmdq_trigger_handle, struct DSI_START_REG,
-                  DSI_REG[0]-&gt;DSI_START, DSI_START, 0);
-        DSI_OUTREGBIT(cmdq_trigger_handle, struct DSI_START_REG,
-                  DSI_REG[1]-&gt;DSI_START, DSI_START, 0);
-
-        DSI_OUTREGBIT(cmdq_trigger_handle, struct DSI_COM_CTRL_REG,
-                  DSI_REG[0]-&gt;DSI_COM_CTRL, DSI_DUAL_EN, 1);
-        DSI_OUTREGBIT(cmdq_trigger_handle, struct DSI_COM_CTRL_REG,
-                  DSI_REG[1]-&gt;DSI_COM_CTRL, DSI_DUAL_EN, 1);
-
-    }
-    /* 1. set dsi vdo mode */
-    DSI_SetMode(module, cmdq_trigger_handle, dsi_params-&gt;mode);
-
-    /* 2. enable HS */
-    /* DSI_clk_HS_mode(module, cmdq_trigger_handle, true); */
-
-    /* 3. enable mutex */
-    /* ddp_mutex_enable(mutex_id_for_latest_trigger,0,cmdq_trigger_handle); */
-
-    /* 4. start dsi */
-    /* DSI_Start(module, cmdq_trigger_handle); */
-
-} else if (state == CMDQ_DSI_RESET) {
-    DISPMSG(&quot;CMDQ Timeout, Reset DSI\n&quot;);
-    DSI_DumpRegisters(module, 1);
-    DSI_Reset(module, NULL);
-}
-
-return ret;
-</code></pre><p>}</p>
-<p>四．案例分析<br>1.哪个案子的哪种显示屏：V166-357D jd9365<br>2.现象：有进行复位动作，但是屏无法恢复<br>3.分析：读0x0a寄存器，出现异常的情况为0x18或者0x08，且经过连续5次recovery之后异常没有消除，最终退出了recovery kthread屏也没有恢复<br>4.解决办法：<br>a.修改lcm_init和lcm_suspend时lcm rst脚的控制方法及延时的时间，保证每一次初始化过程更合理有效</p>
-<p>b.增加初始化时下发0x11的次数确保下发成功</p>
-<p>c. 在primary_display_esd_check_worker_kthread中增加复位延时的时间，确保有足够的时间能使0x0a恢复正常之后再进行下一次esd check</p>
-<p>解决办法主要是c，另外中间的延时可以具体细调，不能延时过高影响用户体验，也不能延时太低再出现esd recovery fail。</p>
-<p>6.Himax TP的ESD读寄存器只支持mipi长包，需要识别各个寄存器返回多个值，参考FAQ13728在ddp_dsi.c的ESD_CMP处添加修改。</p>
-
-        
-        
-        <p class="article-more-link">
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-
-</div>
-
-
-
-
-<div class="comments-count">
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
   <h1 itemprop="name">
     
       <a href="/2019/04/09/Linux-usb子系统（一）：子系统架构/" title="Linux usb子系统（一）：子系统架构" itemprop="url">Linux usb子系统（一）：子系统架构</a>
@@ -881,9 +92,16 @@ return ret;
     
   </p>
 </header>
-    <div class="article-content">
-        
-        <h3 id="Linux-usb子系统（一）：子系统架构"><a href="#Linux-usb子系统（一）：子系统架构" class="headerlink" title="Linux usb子系统（一）：子系统架构"></a>Linux usb子系统（一）：子系统架构</h3><p>一、USB协议基础知识  </p>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Linux-usb子系统（一）：子系统架构"><span class="toc-number">1.</span> <span class="toc-text">Linux usb子系统（一）：子系统架构</span></a></li></ol>
+		
+		</div>
+		
+		<h3 id="Linux-usb子系统（一）：子系统架构"><a href="#Linux-usb子系统（一）：子系统架构" class="headerlink" title="Linux usb子系统（一）：子系统架构"></a>Linux usb子系统（一）：子系统架构</h3><p>一、USB协议基础知识  </p>
 <p>前序：USB概念概述</p>
 <p>　　USB1.0版本速度1.5Mbps（低速USB） USB1.1版本速度12Mbps（全速USB）  USB2.0版本速度480Mbps（高速USB）。</p>
 <p>　　USB 分为主从两大体系，一般而言， PC 中的 USB 系统就是作主，而一般的 USB 鼠标， U 盘则是典型的 USB 从系统。</p>
@@ -1796,14 +1014,9 @@ if (status)
 return;
 </code></pre><p>loop_disable:<br>        hub_port_disable(hub, port1, 1);<br>loop:<br>        usb_ep0_reinit(udev);<br>        release_address(udev);<br>        hub_free_dev(udev);<br>        usb_put_dev(udev);<br>        if ((status == -ENOTCONN) || (status == -ENOTSUPP))<br>            break;<br>    }<br>    if (hub-&gt;hdev-&gt;parent ||<br>            !hcd-&gt;driver-&gt;port_handed_over ||<br>            !(hcd-&gt;driver-&gt;port_handed_over)(hcd, port1))<br>        dev_err(hub_dev, “unable to enumerate USB device on port %d\n”,<br>                port1);<br>// Done标号是对应上述处理失败的处理,它禁用掉该端口(因为该端口没有连接设备或者是端口上的设备配置失败),如果是root hub,且USB控制器器驱动中又定义了relinquish_port.调用它.<br>done:<br>    hub_port_disable(hub, port1, 1);<br>    if (hcd-&gt;driver-&gt;relinquish_port &amp;&amp; !hub-&gt;hdev-&gt;parent)<br>        hcd-&gt;driver-&gt;relinquish_port(hcd, port1);<br>}</p>
 <p> 参考了很多大神的分析，非常感谢！</p>
-
-        
-        
-        <p class="article-more-link">
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
+  
+	</div>
+		<footer class="article-footer clearfix">
 <div class="article-catetags">
 
 
@@ -1811,252 +1024,53 @@ return;
 
 
 
-
-<div class="comments-count">
+	<div class="article-share" id="share">
 	
-</div>
+	  <div data-url="http://yoursite.com/2019/04/09/Linux-usb子系统（一）：子系统架构/" data-title="Linux usb子系统（一）：子系统架构 | Born" data-tsina class="share clearfix">
+	  </div>
+	
+	</div>
+
 
 </footer>
 
-
-    </article>
-
-
-
-
-
-
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2019/04/09/firstblog/" title="Born 2013的第一篇博客" itemprop="url">Born 2013的第一篇博客</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Born" target="_blank" itemprop="author">Born</a>
-		
-  </p><p class="article-time">
-    <time datetime="2019-04-09T10:14:09.000Z" itemprop="datePublished"> 发表于 2019-04-09</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <h3 id="USB-Audio-Class-UAC-分析"><a href="#USB-Audio-Class-UAC-分析" class="headerlink" title="USB Audio Class (UAC) 分析"></a>USB Audio Class (UAC) 分析</h3><p>一个UAC设备插入到Ubuntu 14.04电脑上dmesg中打印的信息如下：</p>
-<p>[ 2367.490491] usb 3-3.2: new full-speed USB device number 9 using xhci_hcd<br>[ 2367.580010] usb 3-3.2: New USB device found, idVendor=0d8c, idProduct=0132<br>[ 2367.580018] usb 3-3.2: New USB device strings: Mfr=1, Product=2, SerialNumber=0<br>[ 2367.580023] usb 3-3.2: Product: USB PnP Audio Device<br>[ 2367.580027] usb 3-3.2: Manufacturer: C-Media Electronics Inc.<br>[ 2367.581679] input: C-Media Electronics Inc. USB PnP Audio Device as /devices/pci0000:00/0000:00:14.0/usb3/3-3/3-3.2/3-3.2:1.2/0003:0D8C:0132.0004/input/input18<br>[ 2367.581999] hid-generic 0003:0D8C:0132.0004: input,hidraw3: USB HID v1.11 Device [C-Media Electronics Inc. USB PnP Audio Device] on usb-0000:00:14.0-3.2/input2<br>[ 2367.913280] usbcore: registered new interface driver snd-usb-audio</p>
-<p>这里可以看到其驱动程序为snd-usb-audio，依据这个关键词在内核中查找到如下内容：</p>
-<p>tony@tony-E431:~/linux-3.4.y$ grep “registered new interface driver” ./ -rn<br>Binary file ./vmlinux.o matches<br>Binary file ./.tmp_vmlinux1 matches<br>Binary file ./.tmp_vmlinux2 matches<br>Binary file ./drivers/built-in.o matches<br>Binary file ./drivers/usb/built-in.o matches<br>Binary file ./drivers/usb/core/built-in.o matches<br>./drivers/usb/core/driver.c:865:    pr_info(“%s: registered new interface driver %s\n”,<br>Binary file ./drivers/usb/core/driver.o matches<br>Binary file ./drivers/usb/core/usbcore.o matches<br>Binary file ./arch/arm/boot/Image matches<br>Binary file ./vmlinux matches<br>tony@tony-E431:~/linux-3.4.y$ </p>
-<p>以及</p>
-<p>// file: linux-3.4.y/sound/usb/card.c<br>/*</p>
-<ul>
-<li>entry point for linux usb interface<br>*/</li>
-</ul>
-<p>static struct usb_driver usb_audio_driver = {<br>    .name =     “snd-usb-audio”,<br>    .probe =    usb_audio_probe,<br>    .disconnect =   usb_audio_disconnect,<br>    .suspend =  usb_audio_suspend,<br>    .resume =   usb_audio_resume,<br>    .id_table = usb_audio_ids,<br>    .supports_autosuspend = 1,<br>};</p>
-<p>根据probe方法snd_usb_audio_probe调用了snd_usb_apply_boot_quirk和snd_card_register，查到了</p>
-<p>// linux-3.4.y/sound/usb/card.c<br>/*</p>
-<ul>
-<li>new 2.5 USB kernel API<br><em>/<br>static int usb_audio_probe(struct usb_interface </em>intf,<pre><code>const struct usb_device_id *id)
-</code></pre>{<br> struct snd_usb_audio *chip;<br> chip = snd_usb_audio_probe(interface_to_usbdev(intf), intf, id);<br> if (chip) {<pre><code>usb_set_intfdata(intf, chip);
-return 0;
-</code></pre> } else<pre><code>return -EIO;
-</code></pre>}</li>
-</ul>
-<p>// linux-3.4.y/sound/usb/quirks.c<br>int snd_usb_apply_boot_quirk(struct usb_device <em>dev,<br>                 struct usb_interface </em>intf,<br>                 const struct snd_usb_audio_quirk *quirk)<br>{<br>    u32 id = USB_ID(le16_to_cpu(dev-&gt;descriptor.idVendor),<br>            le16_to_cpu(dev-&gt;descriptor.idProduct));</p>
-<pre><code>switch (id) {
-case USB_ID(0x041e, 0x3000):
-    /* SB Extigy needs special boot-up sequence */
-    /* if more models come, this will go to the quirk list. */
-    return snd_usb_extigy_boot_quirk(dev, intf);
-
-case USB_ID(0x041e, 0x3020):
-    /* SB Audigy 2 NX needs its own boot-up magic, too */
-    return snd_usb_audigy2nx_boot_quirk(dev);
-
-case USB_ID(0x10f5, 0x0200):
-    /* C-Media CM106 / Turtle Beach Audio Advantage Roadie */
-    return snd_usb_cm106_boot_quirk(dev);
-
-case USB_ID(0x0d8c, 0x0102):
-    /* C-Media CM6206 / CM106-Like Sound Device */
-case USB_ID(0x0ccd, 0x00b1): /* Terratec Aureon 7.1 USB */
-    return snd_usb_cm6206_boot_quirk(dev);
-
-case USB_ID(0x133e, 0x0815):
-    /* Access Music VirusTI Desktop */
-    return snd_usb_accessmusic_boot_quirk(dev);
-
-case USB_ID(0x17cc, 0x1000): /* Komplete Audio 6 */
-case USB_ID(0x17cc, 0x1010): /* Traktor Audio 6 */
-case USB_ID(0x17cc, 0x1020): /* Traktor Audio 10 */
-    return snd_usb_nativeinstruments_boot_quirk(dev);
-case USB_ID(0x0763, 0x2012):  /* M-Audio Fast Track Pro USB */
-    return snd_usb_fasttrackpro_boot_quirk(dev);
-}
-
-return 0;
-</code></pre><p>}</p>
-<p>snd_usb_audio_probe<br>/*</p>
-<ul>
-<li>probe the active usb device<br>*</li>
-<li>note that this can be called multiple times per a device, when it</li>
-<li>includes multiple audio control interfaces.<br>*</li>
-<li>thus we check the usb device pointer and creates the card instance</li>
-<li>only at the first time.  the successive calls of this function will</li>
-<li><p>append the pcm interface to the corresponding card.<br><em>/<br>static struct snd_usb_audio </em><br>snd_usb_audio_probe(struct usb_device *dev,</p>
-<pre><code>struct usb_interface *intf,
-const struct usb_device_id *usb_id)
-</code></pre><p>{<br> const struct snd_usb_audio_quirk <em>quirk = (const struct snd_usb_audio_quirk </em>)usb_id-&gt;driver_info;<br> int i, err;<br> struct snd_usb_audio <em>chip;<br> struct usb_host_interface </em>alts;<br> int ifnum;<br> u32 id;</p>
-<p> alts = &amp;intf-&gt;altsetting[0];<br> ifnum = get_iface_desc(alts)-&gt;bInterfaceNumber;<br> id = USB_ID(le16_to_cpu(dev-&gt;descriptor.idVendor),</p>
-<pre><code>le16_to_cpu(dev-&gt;descriptor.idProduct));
-</code></pre><p> if (quirk &amp;&amp; quirk-&gt;ifnum &gt;= 0 &amp;&amp; ifnum != quirk-&gt;ifnum)</p>
-<pre><code>goto __err_val;
-</code></pre><p> if (snd_usb_apply_boot_quirk(dev, intf, quirk) &lt; 0)</p>
-<pre><code>goto __err_val;
-</code></pre><p> /*</p>
-<ul>
-<li><p>found a config.  now register to ALSA<br>*/</p>
-<p>/<em> check whether it’s already registered </em>/<br>chip = NULL;<br>mutex_lock(&amp;register_mutex);<br>for (i = 0; i &lt; SNDRV_CARDS; i++) {<br> if (usb_chip[i] &amp;&amp; usb_chip[i]-&gt;dev == dev) {</p>
-<pre><code>if (usb_chip[i]-&gt;shutdown) {
-    snd_printk(KERN_ERR &quot;USB device is in the shutdown state, cannot create a card instance\n&quot;);
-    goto __error;
-}
-chip = usb_chip[i];
-chip-&gt;probing = 1;
-break;
-</code></pre><p> }<br>}<br>if (! chip) {<br> /* it’s a fresh one.</p>
-<ul>
-<li>now look for an empty slot and create a new card instance<br>*/<br>for (i = 0; i &lt; SNDRV_CARDS; i++)<br> if (enable[i] &amp;&amp; ! usb_chip[i] &amp;&amp;<pre><code>(vid[i] == -1 || vid[i] == USB_ID_VENDOR(id)) &amp;&amp;
-(pid[i] == -1 || pid[i] == USB_ID_PRODUCT(id))) {
-if (snd_usb_audio_create(dev, i, quirk, &amp;chip) &lt; 0) {
-    goto __error;
-}
-snd_card_set_dev(chip-&gt;card, &amp;intf-&gt;dev);
-chip-&gt;pm_intf = intf;
-break;
-</code></pre> }<br>if (!chip) {<br> printk(KERN_ERR “no available usb audio device\n”);<br> goto __error;<br>}<br>}</li>
-</ul>
-<p>/*</p>
-</li>
-<li>For devices with more than one control interface, we assume the</li>
-<li>first contains the audio controls. We might need a more specific</li>
-<li><p>check here in the future.<br>*/<br>if (!chip-&gt;ctrl_intf)<br> chip-&gt;ctrl_intf = alts;</p>
-<p>chip-&gt;txfr_quirk = 0;<br>err = 1; /<em> continue </em>/<br>if (quirk &amp;&amp; quirk-&gt;ifnum != QUIRK_NO_INTERFACE) {<br> /<em> need some special handlings </em>/<br> if ((err = snd_usb_create_quirk(chip, intf, &amp;usb_audio_driver, quirk)) &lt; 0)</p>
-<pre><code>goto __error;
-</code></pre><p>}</p>
-<p>if (err &gt; 0) {<br> /<em> create normal USB audio interfaces </em>/<br> if (snd_usb_create_streams(chip, ifnum) &lt; 0 ||</p>
-<pre><code>snd_usb_create_mixer(chip, ifnum, ignore_ctl_error) &lt; 0) {
-goto __error;
-</code></pre><p> }<br>}</p>
-<p>/<em> we are allowed to call snd_card_register() many times </em>/<br>if (snd_card_register(chip-&gt;card) &lt; 0) {<br> goto __error;<br>}</p>
-<p>usb_chip[chip-&gt;index] = chip;<br>chip-&gt;num_interfaces++;<br>chip-&gt;probing = 0;<br>mutex_unlock(&amp;register_mutex);<br>return chip;</p>
-</li>
-</ul>
-<p>__error:<br> if (chip) {</p>
-<pre><code>if (!chip-&gt;num_interfaces)
-    snd_card_free(chip-&gt;card);
-chip-&gt;probing = 0;
-</code></pre><p> }<br> mutex_unlock(&amp;register_mutex);<br>__err_val:<br> return NULL;<br>}</p>
-</li>
-</ul>
-<p>Bus 003 Device 019: ID 0d8c:0132 C-Media Electronics, Inc.<br>Device Descriptor:<br>  bLength                18<br>  bDescriptorType         1<br>  bcdUSB               1.10<br>  bDeviceClass            0 (Defined at Interface level)<br>  bDeviceSubClass         0<br>  bDeviceProtocol         0<br>  bMaxPacketSize0        16<br>  idVendor           0x0d8c C-Media Electronics, Inc.<br>  idProduct          0x0132<br>  bcdDevice            1.00<br>  iManufacturer           1 C-Media Electronics Inc.<br>  iProduct                2 USB PnP Audio Device<br>  iSerial                 0<br>  bNumConfigurations      1<br>  Configuration Descriptor:<br>    bLength                 9<br>    bDescriptorType         2<br>    wTotalLength          221<br>    bNumInterfaces          3<br>    bConfigurationValue     1<br>    iConfiguration          0<br>    bmAttributes         0x80<br>      (Bus Powered)<br>    MaxPower              100mA<br>    Interface Descriptor:<br>      bLength                 9<br>      bDescriptorType         4<br>      bInterfaceNumber        0<br>      bAlternateSetting       0<br>      bNumEndpoints           0<br>      bInterfaceClass         1 Audio<br>      bInterfaceSubClass      1 Control Device<br>      bInterfaceProtocol      0<br>      iInterface              0<br>      AudioControl Interface Descriptor:<br>        bLength                 9<br>        bDescriptorType        36<br>        bDescriptorSubtype      1 (HEADER)<br>        bcdADC               1.00<br>        wTotalLength           47<br>        bInCollection           1<br>        baInterfaceNr( 0)       1<br>      AudioControl Interface Descriptor:<br>        bLength                12<br>        bDescriptorType        36<br>        bDescriptorSubtype      2 (INPUT_TERMINAL)<br>        bTerminalID             2<br>        wTerminalType      0x0201 Microphone<br>        bAssocTerminal          0<br>        bNrChannels             2<br>        wChannelConfig     0x0003<br>          Left Front (L)<br>          Right Front (R)<br>        iChannelNames           0<br>        iTerminal               0<br>      AudioControl Interface Descriptor:<br>        bLength                 9<br>        bDescriptorType        36<br>        bDescriptorSubtype      3 (OUTPUT_TERMINAL)<br>        bTerminalID             7<br>        wTerminalType      0x0101 USB Streaming<br>        bAssocTerminal          0<br>        bSourceID               8<br>        iTerminal               0<br>      AudioControl Interface Descriptor:<br>        bLength                 7<br>        bDescriptorType        36<br>        bDescriptorSubtype      5 (SELECTOR_UNIT)<br>        bUnitID                 8<br>        bNrInPins               1<br>        baSource( 0)           10<br>        iSelector               0<br>      AudioControl Interface Descriptor:<br>        bLength                10<br>        bDescriptorType        36<br>        bDescriptorSubtype      6 (FEATURE_UNIT)<br>        bUnitID                10<br>        bSourceID               2<br>        bControlSize            1<br>        bmaControls( 0)      0x01<br>          Mute Control<br>        bmaControls( 1)      0x02<br>          Volume Control<br>        bmaControls( 2)      0x02<br>          Volume Control<br>        iFeature                0<br>    Interface Descriptor:<br>      bLength                 9<br>      bDescriptorType         4<br>      bInterfaceNumber        1<br>      bAlternateSetting       0<br>      bNumEndpoints           0<br>      bInterfaceClass         1 Audio<br>      bInterfaceSubClass      2 Streaming<br>      bInterfaceProtocol      0<br>      iInterface              0<br>    Interface Descriptor:<br>      bLength                 9<br>      bDescriptorType         4<br>      bInterfaceNumber        1<br>      bAlternateSetting       1<br>      bNumEndpoints           1<br>      bInterfaceClass         1 Audio<br>      bInterfaceSubClass      2 Streaming<br>      bInterfaceProtocol      0<br>      iInterface              0<br>      AudioStreaming Interface Descriptor:<br>        bLength                 7<br>        bDescriptorType        36<br>        bDescriptorSubtype      1 (AS_GENERAL)<br>        bTerminalLink           7<br>        bDelay                  1 frames<br>        wFormatTag              1 PCM<br>      AudioStreaming Interface Descriptor:<br>        bLength                29<br>        bDescriptorType        36<br>        bDescriptorSubtype      2 (FORMAT_TYPE)<br>        bFormatType             1 (FORMAT_TYPE_I)<br>        bNrChannels             1<br>        bSubframeSize           2<br>        bBitResolution         16<br>        bSamFreqType            7 Discrete<br>        tSamFreq[ 0]         8000<br>        tSamFreq[ 1]        11025<br>        tSamFreq[ 2]        16000<br>        tSamFreq[ 3]        22050<br>        tSamFreq[ 4]        32000<br>        tSamFreq[ 5]        44100<br>        tSamFreq[ 6]        48000<br>      Endpoint Descriptor:<br>        bLength                 9<br>        bDescriptorType         5<br>        bEndpointAddress     0x82  EP 2 IN<br>        bmAttributes            5<br>          Transfer Type            Isochronous<br>          Synch Type               Asynchronous<br>          Usage Type               Data<br>        wMaxPacketSize     0x0064  1x 100 bytes<br>        bInterval               1<br>        bRefresh                0<br>        bSynchAddress           0<br>        AudioControl Endpoint Descriptor:<br>          bLength                 7<br>          bDescriptorType        37<br>          bDescriptorSubtype      1 (EP_GENERAL)<br>          bmAttributes         0x01<br>            Sampling Frequency<br>          bLockDelayUnits         0 Undefined<br>          wLockDelay              0 Undefined<br>    Interface Descriptor:<br>      bLength                 9<br>      bDescriptorType         4<br>      bInterfaceNumber        1<br>      bAlternateSetting       2<br>      bNumEndpoints           1<br>      bInterfaceClass         1 Audio<br>      bInterfaceSubClass      2 Streaming<br>      bInterfaceProtocol      0<br>      iInterface              0<br>      AudioStreaming Interface Descriptor:<br>        bLength                 7<br>        bDescriptorType        36<br>        bDescriptorSubtype      1 (AS_GENERAL)<br>        bTerminalLink           7<br>        bDelay                  1 frames<br>        wFormatTag              1 PCM<br>      AudioStreaming Interface Descriptor:<br>        bLength                29<br>        bDescriptorType        36<br>        bDescriptorSubtype      2 (FORMAT_TYPE)<br>        bFormatType             1 (FORMAT_TYPE_I)<br>        bNrChannels             2<br>        bSubframeSize           2<br>        bBitResolution         16<br>        bSamFreqType            7 Discrete<br>        tSamFreq[ 0]         8000<br>        tSamFreq[ 1]        11025<br>        tSamFreq[ 2]        16000<br>        tSamFreq[ 3]        22050<br>        tSamFreq[ 4]        32000<br>        tSamFreq[ 5]        44100<br>        tSamFreq[ 6]        48000<br>      Endpoint Descriptor:<br>        bLength                 9<br>        bDescriptorType         5<br>        bEndpointAddress     0x82  EP 2 IN<br>        bmAttributes            5<br>          Transfer Type            Isochronous<br>          Synch Type               Asynchronous<br>          Usage Type               Data<br>        wMaxPacketSize     0x00c8  1x 200 bytes<br>        bInterval               1<br>        bRefresh                0<br>        bSynchAddress           0<br>        AudioControl Endpoint Descriptor:<br>          bLength                 7<br>          bDescriptorType        37<br>          bDescriptorSubtype      1 (EP_GENERAL)<br>          bmAttributes         0x01<br>            Sampling Frequency<br>          bLockDelayUnits         0 Undefined<br>          wLockDelay              0 Undefined<br>    Interface Descriptor:<br>      bLength                 9<br>      bDescriptorType         4<br>      bInterfaceNumber        2<br>      bAlternateSetting       0<br>      bNumEndpoints           1<br>      bInterfaceClass         3 Human Interface Device<br>      bInterfaceSubClass      0 No Subclass<br>      bInterfaceProtocol      0 None<br>      iInterface              0<br>        HID Device Descriptor:<br>          bLength                 9<br>          bDescriptorType        33<br>          bcdHID               1.11<br>          bCountryCode            0 Not supported<br>          bNumDescriptors         1<br>          bDescriptorType        34 Report<br>          wDescriptorLength      26<br>         Report Descriptors:<br>           <strong> UNAVAILABLE </strong><br>      Endpoint Descriptor:<br>        bLength                 7<br>        bDescriptorType         5<br>        bEndpointAddress     0x87  EP 7 IN<br>        bmAttributes            3<br>          Transfer Type            Interrupt<br>          Synch Type               None<br>          Usage Type               Data<br>        wMaxPacketSize     0x0010  1x 16 bytes<br>        bInterval               1<br>Device Status:     0x0000<br>  (Bus Powered)</p>
-<p>总结：<br>UAC设备的参数是通过USB描述符确定的。比如声道是bNrChannels，位深是bBitResolution，采样率是bSamFreqType。截取其中一段说明：</p>
-<p>bNrChannels             1<br>bSubframeSize           2<br>bBitResolution         16<br>bSamFreqType            7 Discrete<br>tSamFreq[ 0]         8000<br>tSamFreq[ 1]        11025<br>tSamFreq[ 2]        16000<br>tSamFreq[ 3]        22050<br>tSamFreq[ 4]        32000<br>tSamFreq[ 5]        44100<br>tSamFreq[ 6]        48000</p>
-<p>声道1，位深16，波特率8000~48000。</p>
-<p> -博客地址： Born2013.github.io</p>
-
-        
-        
-        <p class="article-more-link">
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-
-</div>
-
-
-
-
-<div class="comments-count">
+   	       
+	</article>
 	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2019/04/09/hello-world/" title="Hello World" itemprop="url">Hello World</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Born" target="_blank" itemprop="author">Born</a>
-		
-  </p><p class="article-time">
-    <time datetime="2019-04-09T09:52:57.933Z" itemprop="datePublished"> 发表于 2019-04-09</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>
-
-        
-        
-        <p class="article-more-link">
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-
+<nav class="article-nav clearfix">
+ 
+ <div class="prev">
+ <a href="/2019/04/09/lcm-ESD/" title="lcm ESD">
+  <strong>上一篇：</strong><br>
+  <span>
+  lcm ESD</span>
+</a>
 </div>
 
 
+<div class="next">
+<a href="/2019/04/09/firstblog/" title="Born 2013的第一篇博客">
+ <strong>下一篇：</strong><br> 
+ <span>Born 2013的第一篇博客
+</span>
+</a>
+</div>
 
+</nav>
 
-<div class="comments-count">
 	
-</div>
-
-</footer>
-
-
-    </article>
 
 
 
-
-
-
-
-</div>
+</div>  
       <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Linux-usb子系统（一）：子系统架构"><span class="toc-number">1.</span> <span class="toc-text">Linux usb子系统（一）：子系统架构</span></a></li></ol>
+ 
+  </div>
 
 <div id="asidepart">
 <div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
@@ -2187,12 +1201,89 @@ $(document).ready(function(){
       m.removeClass('moveMain');
       a.css('display', 'block').removeClass('fadeOut');
       o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
         
     }
   });
 });
 </script>
 
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
 
 
 
@@ -2265,4 +1356,4 @@ var _hmt = _hmt || [];
 <!-- Tiny_search End -->
 
   </body>
- </html>
+</html>

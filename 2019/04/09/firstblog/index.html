@@ -11,17 +11,17 @@
     
 
     
-    <meta name="description" content="Born 2013的第一篇博客 -博客地址： Born2013.github.io">
+    <meta name="description" content="USB Audio Class (UAC) 分析一个UAC设备插入到Ubuntu 14.04电脑上dmesg中打印的信息如下： [ 2367.490491] usb 3-3.2: new full-speed USB device number 9 using xhci_hcd[ 2367.580010] usb 3-3.2: New USB device found, idVendor=0d8c">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Born 2013的第一篇博客">
 <meta property="og:url" content="http://yoursite.com/2019/04/09/firstblog/index.html">
 <meta property="og:site_name" content="Born">
-<meta property="og:description" content="Born 2013的第一篇博客 -博客地址： Born2013.github.io">
+<meta property="og:description" content="USB Audio Class (UAC) 分析一个UAC设备插入到Ubuntu 14.04电脑上dmesg中打印的信息如下： [ 2367.490491] usb 3-3.2: new full-speed USB device number 9 using xhci_hcd[ 2367.580010] usb 3-3.2: New USB device found, idVendor=0d8c">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-04-09T11:16:04.016Z">
+<meta property="og:updated_time" content="2019-04-09T11:31:59.228Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Born 2013的第一篇博客">
-<meta name="twitter:description" content="Born 2013的第一篇博客 -博客地址： Born2013.github.io">
+<meta name="twitter:description" content="USB Audio Class (UAC) 分析一个UAC设备插入到Ubuntu 14.04电脑上dmesg中打印的信息如下： [ 2367.490491] usb 3-3.2: new full-speed USB device number 9 using xhci_hcd[ 2367.580010] usb 3-3.2: New USB device found, idVendor=0d8c">
 
     
     <link rel="alternative" href="/atom.xml" title="Born" type="application/atom+xml">
@@ -47,7 +47,7 @@
 			
 			<div id="textlogo">
 				<h1 class="site-name"><a href="/" title="Born">Born</a></h1>
-				<h2 class="blog-motto">The life is a game</h2>
+				<h2 class="blog-motto">The life is a puzzle</h2>
 			</div>
 			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
 			</a></div>
@@ -97,11 +97,131 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Born-2013的第一篇博客"><span class="toc-number">1.</span> <span class="toc-text">Born 2013的第一篇博客</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#USB-Audio-Class-UAC-分析"><span class="toc-number">1.</span> <span class="toc-text">USB Audio Class (UAC) 分析</span></a></li></ol>
 		
 		</div>
 		
-		<h3 id="Born-2013的第一篇博客"><a href="#Born-2013的第一篇博客" class="headerlink" title="Born 2013的第一篇博客"></a>Born 2013的第一篇博客</h3><p> -博客地址： Born2013.github.io</p>
+		<h3 id="USB-Audio-Class-UAC-分析"><a href="#USB-Audio-Class-UAC-分析" class="headerlink" title="USB Audio Class (UAC) 分析"></a>USB Audio Class (UAC) 分析</h3><p>一个UAC设备插入到Ubuntu 14.04电脑上dmesg中打印的信息如下：</p>
+<p>[ 2367.490491] usb 3-3.2: new full-speed USB device number 9 using xhci_hcd<br>[ 2367.580010] usb 3-3.2: New USB device found, idVendor=0d8c, idProduct=0132<br>[ 2367.580018] usb 3-3.2: New USB device strings: Mfr=1, Product=2, SerialNumber=0<br>[ 2367.580023] usb 3-3.2: Product: USB PnP Audio Device<br>[ 2367.580027] usb 3-3.2: Manufacturer: C-Media Electronics Inc.<br>[ 2367.581679] input: C-Media Electronics Inc. USB PnP Audio Device as /devices/pci0000:00/0000:00:14.0/usb3/3-3/3-3.2/3-3.2:1.2/0003:0D8C:0132.0004/input/input18<br>[ 2367.581999] hid-generic 0003:0D8C:0132.0004: input,hidraw3: USB HID v1.11 Device [C-Media Electronics Inc. USB PnP Audio Device] on usb-0000:00:14.0-3.2/input2<br>[ 2367.913280] usbcore: registered new interface driver snd-usb-audio</p>
+<p>这里可以看到其驱动程序为snd-usb-audio，依据这个关键词在内核中查找到如下内容：</p>
+<p>tony@tony-E431:~/linux-3.4.y$ grep “registered new interface driver” ./ -rn<br>Binary file ./vmlinux.o matches<br>Binary file ./.tmp_vmlinux1 matches<br>Binary file ./.tmp_vmlinux2 matches<br>Binary file ./drivers/built-in.o matches<br>Binary file ./drivers/usb/built-in.o matches<br>Binary file ./drivers/usb/core/built-in.o matches<br>./drivers/usb/core/driver.c:865:    pr_info(“%s: registered new interface driver %s\n”,<br>Binary file ./drivers/usb/core/driver.o matches<br>Binary file ./drivers/usb/core/usbcore.o matches<br>Binary file ./arch/arm/boot/Image matches<br>Binary file ./vmlinux matches<br>tony@tony-E431:~/linux-3.4.y$ </p>
+<p>以及</p>
+<p>// file: linux-3.4.y/sound/usb/card.c<br>/*</p>
+<ul>
+<li>entry point for linux usb interface<br>*/</li>
+</ul>
+<p>static struct usb_driver usb_audio_driver = {<br>    .name =     “snd-usb-audio”,<br>    .probe =    usb_audio_probe,<br>    .disconnect =   usb_audio_disconnect,<br>    .suspend =  usb_audio_suspend,<br>    .resume =   usb_audio_resume,<br>    .id_table = usb_audio_ids,<br>    .supports_autosuspend = 1,<br>};</p>
+<p>根据probe方法snd_usb_audio_probe调用了snd_usb_apply_boot_quirk和snd_card_register，查到了</p>
+<p>// linux-3.4.y/sound/usb/card.c<br>/*</p>
+<ul>
+<li>new 2.5 USB kernel API<br><em>/<br>static int usb_audio_probe(struct usb_interface </em>intf,<pre><code>const struct usb_device_id *id)
+</code></pre>{<br> struct snd_usb_audio *chip;<br> chip = snd_usb_audio_probe(interface_to_usbdev(intf), intf, id);<br> if (chip) {<pre><code>usb_set_intfdata(intf, chip);
+return 0;
+</code></pre> } else<pre><code>return -EIO;
+</code></pre>}</li>
+</ul>
+<p>// linux-3.4.y/sound/usb/quirks.c<br>int snd_usb_apply_boot_quirk(struct usb_device <em>dev,<br>                 struct usb_interface </em>intf,<br>                 const struct snd_usb_audio_quirk *quirk)<br>{<br>    u32 id = USB_ID(le16_to_cpu(dev-&gt;descriptor.idVendor),<br>            le16_to_cpu(dev-&gt;descriptor.idProduct));</p>
+<pre><code>switch (id) {
+case USB_ID(0x041e, 0x3000):
+    /* SB Extigy needs special boot-up sequence */
+    /* if more models come, this will go to the quirk list. */
+    return snd_usb_extigy_boot_quirk(dev, intf);
+
+case USB_ID(0x041e, 0x3020):
+    /* SB Audigy 2 NX needs its own boot-up magic, too */
+    return snd_usb_audigy2nx_boot_quirk(dev);
+
+case USB_ID(0x10f5, 0x0200):
+    /* C-Media CM106 / Turtle Beach Audio Advantage Roadie */
+    return snd_usb_cm106_boot_quirk(dev);
+
+case USB_ID(0x0d8c, 0x0102):
+    /* C-Media CM6206 / CM106-Like Sound Device */
+case USB_ID(0x0ccd, 0x00b1): /* Terratec Aureon 7.1 USB */
+    return snd_usb_cm6206_boot_quirk(dev);
+
+case USB_ID(0x133e, 0x0815):
+    /* Access Music VirusTI Desktop */
+    return snd_usb_accessmusic_boot_quirk(dev);
+
+case USB_ID(0x17cc, 0x1000): /* Komplete Audio 6 */
+case USB_ID(0x17cc, 0x1010): /* Traktor Audio 6 */
+case USB_ID(0x17cc, 0x1020): /* Traktor Audio 10 */
+    return snd_usb_nativeinstruments_boot_quirk(dev);
+case USB_ID(0x0763, 0x2012):  /* M-Audio Fast Track Pro USB */
+    return snd_usb_fasttrackpro_boot_quirk(dev);
+}
+
+return 0;
+</code></pre><p>}</p>
+<p>snd_usb_audio_probe<br>/*</p>
+<ul>
+<li>probe the active usb device<br>*</li>
+<li>note that this can be called multiple times per a device, when it</li>
+<li>includes multiple audio control interfaces.<br>*</li>
+<li>thus we check the usb device pointer and creates the card instance</li>
+<li>only at the first time.  the successive calls of this function will</li>
+<li><p>append the pcm interface to the corresponding card.<br><em>/<br>static struct snd_usb_audio </em><br>snd_usb_audio_probe(struct usb_device *dev,</p>
+<pre><code>struct usb_interface *intf,
+const struct usb_device_id *usb_id)
+</code></pre><p>{<br> const struct snd_usb_audio_quirk <em>quirk = (const struct snd_usb_audio_quirk </em>)usb_id-&gt;driver_info;<br> int i, err;<br> struct snd_usb_audio <em>chip;<br> struct usb_host_interface </em>alts;<br> int ifnum;<br> u32 id;</p>
+<p> alts = &amp;intf-&gt;altsetting[0];<br> ifnum = get_iface_desc(alts)-&gt;bInterfaceNumber;<br> id = USB_ID(le16_to_cpu(dev-&gt;descriptor.idVendor),</p>
+<pre><code>le16_to_cpu(dev-&gt;descriptor.idProduct));
+</code></pre><p> if (quirk &amp;&amp; quirk-&gt;ifnum &gt;= 0 &amp;&amp; ifnum != quirk-&gt;ifnum)</p>
+<pre><code>goto __err_val;
+</code></pre><p> if (snd_usb_apply_boot_quirk(dev, intf, quirk) &lt; 0)</p>
+<pre><code>goto __err_val;
+</code></pre><p> /*</p>
+<ul>
+<li><p>found a config.  now register to ALSA<br>*/</p>
+<p>/<em> check whether it’s already registered </em>/<br>chip = NULL;<br>mutex_lock(&amp;register_mutex);<br>for (i = 0; i &lt; SNDRV_CARDS; i++) {<br> if (usb_chip[i] &amp;&amp; usb_chip[i]-&gt;dev == dev) {</p>
+<pre><code>if (usb_chip[i]-&gt;shutdown) {
+    snd_printk(KERN_ERR &quot;USB device is in the shutdown state, cannot create a card instance\n&quot;);
+    goto __error;
+}
+chip = usb_chip[i];
+chip-&gt;probing = 1;
+break;
+</code></pre><p> }<br>}<br>if (! chip) {<br> /* it’s a fresh one.</p>
+<ul>
+<li>now look for an empty slot and create a new card instance<br>*/<br>for (i = 0; i &lt; SNDRV_CARDS; i++)<br> if (enable[i] &amp;&amp; ! usb_chip[i] &amp;&amp;<pre><code>(vid[i] == -1 || vid[i] == USB_ID_VENDOR(id)) &amp;&amp;
+(pid[i] == -1 || pid[i] == USB_ID_PRODUCT(id))) {
+if (snd_usb_audio_create(dev, i, quirk, &amp;chip) &lt; 0) {
+    goto __error;
+}
+snd_card_set_dev(chip-&gt;card, &amp;intf-&gt;dev);
+chip-&gt;pm_intf = intf;
+break;
+</code></pre> }<br>if (!chip) {<br> printk(KERN_ERR “no available usb audio device\n”);<br> goto __error;<br>}<br>}</li>
+</ul>
+<p>/*</p>
+</li>
+<li>For devices with more than one control interface, we assume the</li>
+<li>first contains the audio controls. We might need a more specific</li>
+<li><p>check here in the future.<br>*/<br>if (!chip-&gt;ctrl_intf)<br> chip-&gt;ctrl_intf = alts;</p>
+<p>chip-&gt;txfr_quirk = 0;<br>err = 1; /<em> continue </em>/<br>if (quirk &amp;&amp; quirk-&gt;ifnum != QUIRK_NO_INTERFACE) {<br> /<em> need some special handlings </em>/<br> if ((err = snd_usb_create_quirk(chip, intf, &amp;usb_audio_driver, quirk)) &lt; 0)</p>
+<pre><code>goto __error;
+</code></pre><p>}</p>
+<p>if (err &gt; 0) {<br> /<em> create normal USB audio interfaces </em>/<br> if (snd_usb_create_streams(chip, ifnum) &lt; 0 ||</p>
+<pre><code>snd_usb_create_mixer(chip, ifnum, ignore_ctl_error) &lt; 0) {
+goto __error;
+</code></pre><p> }<br>}</p>
+<p>/<em> we are allowed to call snd_card_register() many times </em>/<br>if (snd_card_register(chip-&gt;card) &lt; 0) {<br> goto __error;<br>}</p>
+<p>usb_chip[chip-&gt;index] = chip;<br>chip-&gt;num_interfaces++;<br>chip-&gt;probing = 0;<br>mutex_unlock(&amp;register_mutex);<br>return chip;</p>
+</li>
+</ul>
+<p>__error:<br> if (chip) {</p>
+<pre><code>if (!chip-&gt;num_interfaces)
+    snd_card_free(chip-&gt;card);
+chip-&gt;probing = 0;
+</code></pre><p> }<br> mutex_unlock(&amp;register_mutex);<br>__err_val:<br> return NULL;<br>}</p>
+</li>
+</ul>
+<p>Bus 003 Device 019: ID 0d8c:0132 C-Media Electronics, Inc.<br>Device Descriptor:<br>  bLength                18<br>  bDescriptorType         1<br>  bcdUSB               1.10<br>  bDeviceClass            0 (Defined at Interface level)<br>  bDeviceSubClass         0<br>  bDeviceProtocol         0<br>  bMaxPacketSize0        16<br>  idVendor           0x0d8c C-Media Electronics, Inc.<br>  idProduct          0x0132<br>  bcdDevice            1.00<br>  iManufacturer           1 C-Media Electronics Inc.<br>  iProduct                2 USB PnP Audio Device<br>  iSerial                 0<br>  bNumConfigurations      1<br>  Configuration Descriptor:<br>    bLength                 9<br>    bDescriptorType         2<br>    wTotalLength          221<br>    bNumInterfaces          3<br>    bConfigurationValue     1<br>    iConfiguration          0<br>    bmAttributes         0x80<br>      (Bus Powered)<br>    MaxPower              100mA<br>    Interface Descriptor:<br>      bLength                 9<br>      bDescriptorType         4<br>      bInterfaceNumber        0<br>      bAlternateSetting       0<br>      bNumEndpoints           0<br>      bInterfaceClass         1 Audio<br>      bInterfaceSubClass      1 Control Device<br>      bInterfaceProtocol      0<br>      iInterface              0<br>      AudioControl Interface Descriptor:<br>        bLength                 9<br>        bDescriptorType        36<br>        bDescriptorSubtype      1 (HEADER)<br>        bcdADC               1.00<br>        wTotalLength           47<br>        bInCollection           1<br>        baInterfaceNr( 0)       1<br>      AudioControl Interface Descriptor:<br>        bLength                12<br>        bDescriptorType        36<br>        bDescriptorSubtype      2 (INPUT_TERMINAL)<br>        bTerminalID             2<br>        wTerminalType      0x0201 Microphone<br>        bAssocTerminal          0<br>        bNrChannels             2<br>        wChannelConfig     0x0003<br>          Left Front (L)<br>          Right Front (R)<br>        iChannelNames           0<br>        iTerminal               0<br>      AudioControl Interface Descriptor:<br>        bLength                 9<br>        bDescriptorType        36<br>        bDescriptorSubtype      3 (OUTPUT_TERMINAL)<br>        bTerminalID             7<br>        wTerminalType      0x0101 USB Streaming<br>        bAssocTerminal          0<br>        bSourceID               8<br>        iTerminal               0<br>      AudioControl Interface Descriptor:<br>        bLength                 7<br>        bDescriptorType        36<br>        bDescriptorSubtype      5 (SELECTOR_UNIT)<br>        bUnitID                 8<br>        bNrInPins               1<br>        baSource( 0)           10<br>        iSelector               0<br>      AudioControl Interface Descriptor:<br>        bLength                10<br>        bDescriptorType        36<br>        bDescriptorSubtype      6 (FEATURE_UNIT)<br>        bUnitID                10<br>        bSourceID               2<br>        bControlSize            1<br>        bmaControls( 0)      0x01<br>          Mute Control<br>        bmaControls( 1)      0x02<br>          Volume Control<br>        bmaControls( 2)      0x02<br>          Volume Control<br>        iFeature                0<br>    Interface Descriptor:<br>      bLength                 9<br>      bDescriptorType         4<br>      bInterfaceNumber        1<br>      bAlternateSetting       0<br>      bNumEndpoints           0<br>      bInterfaceClass         1 Audio<br>      bInterfaceSubClass      2 Streaming<br>      bInterfaceProtocol      0<br>      iInterface              0<br>    Interface Descriptor:<br>      bLength                 9<br>      bDescriptorType         4<br>      bInterfaceNumber        1<br>      bAlternateSetting       1<br>      bNumEndpoints           1<br>      bInterfaceClass         1 Audio<br>      bInterfaceSubClass      2 Streaming<br>      bInterfaceProtocol      0<br>      iInterface              0<br>      AudioStreaming Interface Descriptor:<br>        bLength                 7<br>        bDescriptorType        36<br>        bDescriptorSubtype      1 (AS_GENERAL)<br>        bTerminalLink           7<br>        bDelay                  1 frames<br>        wFormatTag              1 PCM<br>      AudioStreaming Interface Descriptor:<br>        bLength                29<br>        bDescriptorType        36<br>        bDescriptorSubtype      2 (FORMAT_TYPE)<br>        bFormatType             1 (FORMAT_TYPE_I)<br>        bNrChannels             1<br>        bSubframeSize           2<br>        bBitResolution         16<br>        bSamFreqType            7 Discrete<br>        tSamFreq[ 0]         8000<br>        tSamFreq[ 1]        11025<br>        tSamFreq[ 2]        16000<br>        tSamFreq[ 3]        22050<br>        tSamFreq[ 4]        32000<br>        tSamFreq[ 5]        44100<br>        tSamFreq[ 6]        48000<br>      Endpoint Descriptor:<br>        bLength                 9<br>        bDescriptorType         5<br>        bEndpointAddress     0x82  EP 2 IN<br>        bmAttributes            5<br>          Transfer Type            Isochronous<br>          Synch Type               Asynchronous<br>          Usage Type               Data<br>        wMaxPacketSize     0x0064  1x 100 bytes<br>        bInterval               1<br>        bRefresh                0<br>        bSynchAddress           0<br>        AudioControl Endpoint Descriptor:<br>          bLength                 7<br>          bDescriptorType        37<br>          bDescriptorSubtype      1 (EP_GENERAL)<br>          bmAttributes         0x01<br>            Sampling Frequency<br>          bLockDelayUnits         0 Undefined<br>          wLockDelay              0 Undefined<br>    Interface Descriptor:<br>      bLength                 9<br>      bDescriptorType         4<br>      bInterfaceNumber        1<br>      bAlternateSetting       2<br>      bNumEndpoints           1<br>      bInterfaceClass         1 Audio<br>      bInterfaceSubClass      2 Streaming<br>      bInterfaceProtocol      0<br>      iInterface              0<br>      AudioStreaming Interface Descriptor:<br>        bLength                 7<br>        bDescriptorType        36<br>        bDescriptorSubtype      1 (AS_GENERAL)<br>        bTerminalLink           7<br>        bDelay                  1 frames<br>        wFormatTag              1 PCM<br>      AudioStreaming Interface Descriptor:<br>        bLength                29<br>        bDescriptorType        36<br>        bDescriptorSubtype      2 (FORMAT_TYPE)<br>        bFormatType             1 (FORMAT_TYPE_I)<br>        bNrChannels             2<br>        bSubframeSize           2<br>        bBitResolution         16<br>        bSamFreqType            7 Discrete<br>        tSamFreq[ 0]         8000<br>        tSamFreq[ 1]        11025<br>        tSamFreq[ 2]        16000<br>        tSamFreq[ 3]        22050<br>        tSamFreq[ 4]        32000<br>        tSamFreq[ 5]        44100<br>        tSamFreq[ 6]        48000<br>      Endpoint Descriptor:<br>        bLength                 9<br>        bDescriptorType         5<br>        bEndpointAddress     0x82  EP 2 IN<br>        bmAttributes            5<br>          Transfer Type            Isochronous<br>          Synch Type               Asynchronous<br>          Usage Type               Data<br>        wMaxPacketSize     0x00c8  1x 200 bytes<br>        bInterval               1<br>        bRefresh                0<br>        bSynchAddress           0<br>        AudioControl Endpoint Descriptor:<br>          bLength                 7<br>          bDescriptorType        37<br>          bDescriptorSubtype      1 (EP_GENERAL)<br>          bmAttributes         0x01<br>            Sampling Frequency<br>          bLockDelayUnits         0 Undefined<br>          wLockDelay              0 Undefined<br>    Interface Descriptor:<br>      bLength                 9<br>      bDescriptorType         4<br>      bInterfaceNumber        2<br>      bAlternateSetting       0<br>      bNumEndpoints           1<br>      bInterfaceClass         3 Human Interface Device<br>      bInterfaceSubClass      0 No Subclass<br>      bInterfaceProtocol      0 None<br>      iInterface              0<br>        HID Device Descriptor:<br>          bLength                 9<br>          bDescriptorType        33<br>          bcdHID               1.11<br>          bCountryCode            0 Not supported<br>          bNumDescriptors         1<br>          bDescriptorType        34 Report<br>          wDescriptorLength      26<br>         Report Descriptors:<br>           <strong> UNAVAILABLE </strong><br>      Endpoint Descriptor:<br>        bLength                 7<br>        bDescriptorType         5<br>        bEndpointAddress     0x87  EP 7 IN<br>        bmAttributes            3<br>          Transfer Type            Interrupt<br>          Synch Type               None<br>          Usage Type               Data<br>        wMaxPacketSize     0x0010  1x 16 bytes<br>        bInterval               1<br>Device Status:     0x0000<br>  (Bus Powered)</p>
+<p>总结：<br>UAC设备的参数是通过USB描述符确定的。比如声道是bNrChannels，位深是bBitResolution，采样率是bSamFreqType。截取其中一段说明：</p>
+<p>bNrChannels             1<br>bSubframeSize           2<br>bBitResolution         16<br>bSamFreqType            7 Discrete<br>tSamFreq[ 0]         8000<br>tSamFreq[ 1]        11025<br>tSamFreq[ 2]        16000<br>tSamFreq[ 3]        22050<br>tSamFreq[ 4]        32000<br>tSamFreq[ 5]        44100<br>tSamFreq[ 6]        48000</p>
+<p>声道1，位深16，波特率8000~48000。</p>
+<p> -博客地址： Born2013.github.io</p>
   
 	</div>
 		<footer class="article-footer clearfix">
@@ -127,6 +247,14 @@
 	
 <nav class="article-nav clearfix">
  
+ <div class="prev">
+ <a href="/2019/04/09/Linux-usb子系统（一）：子系统架构/" title="Linux usb子系统（一）：子系统架构">
+  <strong>上一篇：</strong><br>
+  <span>
+  Linux usb子系统（一）：子系统架构</span>
+</a>
+</div>
+
 
 <div class="next">
 <a href="/2019/04/09/hello-world/" title="Hello World">
@@ -148,7 +276,7 @@
   <div id="toc" class="toc-aside">
   <strong class="toc-title">文章目录</strong>
  
- <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Born-2013的第一篇博客"><span class="toc-number">1.</span> <span class="toc-text">Born 2013的第一篇博客</span></a></li></ol>
+ <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#USB-Audio-Class-UAC-分析"><span class="toc-number">1.</span> <span class="toc-text">USB Audio Class (UAC) 分析</span></a></li></ol>
  
   </div>
 
@@ -175,7 +303,7 @@
         
           <li>
             
-            	<a href="http://wuchong.me" target="_blank" title="Jark&#39;s Blog">Jark&#39;s Blog</a>
+            	<a href="http://wuchong.me" target="_blank" title="Born&#39;s Blog">Born&#39;s Blog</a>
             
           </li>
         
@@ -207,7 +335,7 @@
 	
 	
 	<section class="info">
-		<p> Hello ,I&#39;m Larry Page in Google. <br>
+		<p> Hello ,I&#39;m Json Born in Google. <br>
 			This is my blog,believe it or not.</p>
 	</section>
 	 
