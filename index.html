@@ -82,6 +82,93 @@
         <header class="article-info clearfix">
   <h1 itemprop="name">
     
+      <a href="/2019/04/11/Android4-2移植rtl8192cu驱动要点/" title="Android4.2移植rtl8192cu驱动要点" itemprop="url">Android4.2移植rtl8192cu驱动要点</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Born" target="_blank" itemprop="author">Born</a>
+		
+  </p><p class="article-time">
+    <time datetime="2019-04-11T13:11:45.000Z" itemprop="datePublished"> 发表于 2019-04-11</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <h3 id="Android4-2移植rtl8192cu驱动要点"><a href="#Android4-2移植rtl8192cu驱动要点" class="headerlink" title="Android4.2移植rtl8192cu驱动要点"></a>Android4.2移植rtl8192cu驱动要点</h3><p>我的板子上的android系统是4.2版本的，由于板子上没有wifi模块，所以买了一个usb接口的wifi模块，现在要将驱动以及wifi sdk移植到android系统中。</p>
+<pre><code>usb wifi模块上搭载了realtek8188cu芯片，rtl8192cu的驱动兼容rtl8188cus，相关驱动文件可以在realtek的官网上下载到。
+
+官方提供的文件包里有比较详细的教程，且网上有很多关于驱动移植的详细步骤，这些我就不再赘述了，这里记录下我在移植过程中碰到的种种问题：
+</code></pre><p>一、驱动移植篇</p>
+<pre><code>官方提供了详细的文档供我们移植的时候参考，但是要注意的是，在driver/include/目录下有一个autoconf.h文件，这个文件保存了整个驱动的相关配置信息。在文档中有提到一个autoconf_rtl8192c_usb_linux.h文件，这个文件时官方提供给你参考用的，可以根据这个文件里的内容区配置autoconf.h里的内容，但是我在下载的文件包里没有找到这个文件，导致之后调试驱动的时候出了不少问题。     
+
+Android4.2支持station与p2p共存，所以在加载驱动的时候会同时创建wlan0与p2p0两个设备节点。其加载命令为：
+</code></pre><p>insmod wlan.ko ifname=wlan0 if2name=p2p0<br>        这条命令在android系统中的hardware层中在开启wifi功能的时候被自动执行。在没有修改autoconf.h之前，在加载驱动的时候只能认第一个参数，而第二个参数驱动死活不认，搞得只能创建wlan0这个设备。若要使驱动支持android系统的这个特性，则要修改autoconf.h：</p>
+<p>-//#define CONFIG_CONCURRENT_MODE 1<br>+#define CONFIG_CONCURRENT_MODE<br>       将被屏蔽的这个选项选中，这样驱动在加载的时候同时创建wlan0和p2p0设备节点。</p>
+<pre><code>驱动编译成模块即可，然后将ko文件放到目标板中的system/lib/modules中，这样在使能wifi功能的时候，android底层会自动调用驱动。
+</code></pre><p>二、WIFI SDK移植篇</p>
+<pre><code> 官方文件包里提供了4.0，4.1，4.2等几个版本的SDK packages给我们，每个packages里都配有说明文档，移植起来并不是很困难。
+
+但！是！
+
+移植完毕后的所出现的问题就会相当得麻烦（对于像我这种新手来说）。
+</code></pre><p>1.android系统的wifi工作流程</p>
+<pre><code>先将这个流程整理一下，分析问题的时候就会简单得多。
+
+当我们使能wifi功能时，wifi framework层便会去调用相关JNI接口去加载驱动和wpa_supplicant，JNI接口的具体实现是由hardware层中的相关文件实现的（需要移植的部分）。按照realtek的文件来说，就是hardware/realtek/wlan/libhardware_legacy/wifi/wifi_realtek.c文件。
+
+wifi_realtek.c文件负责加载wifi驱动和wap_supplicant，若有一星半点问题都会导致wifi无法开启。
+
+以下是我的调试过程中遇到的问题与解决方法：
+</code></pre><p>①Cannot load driver！（*）</p>
+<p>这里是framework层报的错误，跟踪下来就发现是调用了wifi_realtek.c文件中的intwifi_load_driver()函数，若是使用模块方式加载驱动，wifi_load_driver会去调用int load_driver()函数。驱动加载很简单，出现这种问题一般是忘记将ko文件放到指定目录，或者驱动已被加载所导致的。</p>
+<p>②I/wpa_supplicant(2254): rfkill: Cannot open RFKILL control device</p>
+<p>出现这个问题原因是无法打开dev/rfkill设备节点，修改其权限即可：</p>
+<p>chmod 0777 /dev/rfkill</p>
+<p>③wifi_start_supplicantget wifi_ifname(SECONDARY) fail</p>
+<p>出现这个报错是因为没有 创建p2p0设备节点，导致</p>
+<p>insmod wlan.ko ifname=wlan0 if2name=p2p0</p>
+<p>命令执行不成功，修改内核即可解决问题</p>
+<p>④E/WifiStateMachine(1783): Failed to start supplicant!</p>
+<p>这是framework层中的报错，是由于wap_supplicant没有正确开启所导致的。主要还是在wifi_realtek.c中的int wifi_start_supplicant(int p2p_supported)中找问题。</p>
+<p>将中的</p>
+<p>wifi_stop_supplicant(p2p_supported);<br>wifi_close_supplicant_connection(NULL);<br>wifi_close_supplicant_connection(“sec”);<br>屏蔽掉就好。<br>关于这个问题我也没有弄明白，只不过屏蔽之后就能正确开启wifi了，所以详细解决办法还在研究中。。。</p>
+
+        
+        
+        <p class="article-more-link">
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
       <a href="/2019/04/09/lcm-ESD/" title="lcm ESD" itemprop="url">lcm ESD</a>
   </h1>
   <p class="article-author">By
