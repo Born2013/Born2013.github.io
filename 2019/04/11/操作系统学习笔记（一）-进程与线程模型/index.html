@@ -4,24 +4,24 @@
 <head><meta name="generator" content="Hexo 3.8.0">
   <meta charset="UTF-8">
   
-    <title>Android4.2移植rtl8192cu驱动要点 | Born</title>
+    <title>操作系统学习笔记（一） 进程与线程模型 | Born</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
     
     <meta name="author" content="Born">
     
 
     
-    <meta name="description" content="Android4.2移植rtl8192cu驱动要点我的板子上的android系统是4.2版本的，由于板子上没有wifi模块，所以买了一个usb接口的wifi模块，现在要将驱动以及wifi sdk移植到android系统中。 usb wifi模块上搭载了realtek8188cu芯片，rtl8192cu的驱动兼容rtl8188cus，相关驱动文件可以在realtek的官网上下载到。  官方提供的文件">
+    <meta name="description" content="操作系统学习笔记（一） 进程与线程模型进程可以说是操作系统最为核心的一个抽象，而线程可以认为是一种轻量级的进程，或者说一个进程内的多个迷你进程。 一、进程的模型 进程(process):进程是一个正在运行的程序的实例。对于一个单核的处理器，每个时刻只能运行一个程序，但在每一个时间段，它可能运行多个进程，这样就产生了并行的错觉。 从概念上说，每个进程拥有自己的虚拟CPU，好像它独占了CPU的使用权一">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Android4.2移植rtl8192cu驱动要点">
-<meta property="og:url" content="http://yoursite.com/2019/04/11/Android4-2移植rtl8192cu驱动要点/index.html">
+<meta property="og:title" content="操作系统学习笔记（一） 进程与线程模型">
+<meta property="og:url" content="http://yoursite.com/2019/04/11/操作系统学习笔记（一）-进程与线程模型/index.html">
 <meta property="og:site_name" content="Born">
-<meta property="og:description" content="Android4.2移植rtl8192cu驱动要点我的板子上的android系统是4.2版本的，由于板子上没有wifi模块，所以买了一个usb接口的wifi模块，现在要将驱动以及wifi sdk移植到android系统中。 usb wifi模块上搭载了realtek8188cu芯片，rtl8192cu的驱动兼容rtl8188cus，相关驱动文件可以在realtek的官网上下载到。  官方提供的文件">
+<meta property="og:description" content="操作系统学习笔记（一） 进程与线程模型进程可以说是操作系统最为核心的一个抽象，而线程可以认为是一种轻量级的进程，或者说一个进程内的多个迷你进程。 一、进程的模型 进程(process):进程是一个正在运行的程序的实例。对于一个单核的处理器，每个时刻只能运行一个程序，但在每一个时间段，它可能运行多个进程，这样就产生了并行的错觉。 从概念上说，每个进程拥有自己的虚拟CPU，好像它独占了CPU的使用权一">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-04-11T13:38:51.134Z">
+<meta property="og:updated_time" content="2019-04-11T15:52:01.766Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Android4.2移植rtl8192cu驱动要点">
-<meta name="twitter:description" content="Android4.2移植rtl8192cu驱动要点我的板子上的android系统是4.2版本的，由于板子上没有wifi模块，所以买了一个usb接口的wifi模块，现在要将驱动以及wifi sdk移植到android系统中。 usb wifi模块上搭载了realtek8188cu芯片，rtl8192cu的驱动兼容rtl8188cus，相关驱动文件可以在realtek的官网上下载到。  官方提供的文件">
+<meta name="twitter:title" content="操作系统学习笔记（一） 进程与线程模型">
+<meta name="twitter:description" content="操作系统学习笔记（一） 进程与线程模型进程可以说是操作系统最为核心的一个抽象，而线程可以认为是一种轻量级的进程，或者说一个进程内的多个迷你进程。 一、进程的模型 进程(process):进程是一个正在运行的程序的实例。对于一个单核的处理器，每个时刻只能运行一个程序，但在每一个时间段，它可能运行多个进程，这样就产生了并行的错觉。 从概念上说，每个进程拥有自己的虚拟CPU，好像它独占了CPU的使用权一">
 
     
     <link rel="alternative" href="/atom.xml" title="Born" type="application/atom+xml">
@@ -81,14 +81,14 @@
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2019/04/11/Android4-2移植rtl8192cu驱动要点/" title="Android4.2移植rtl8192cu驱动要点" itemprop="url">Android4.2移植rtl8192cu驱动要点</a>
+      <a href="/2019/04/11/操作系统学习笔记（一）-进程与线程模型/" title="操作系统学习笔记（一） 进程与线程模型" itemprop="url">操作系统学习笔记（一） 进程与线程模型</a>
   </h1>
   <p class="article-author">By
        
 		<a href="/about" title="Born" target="_blank" itemprop="author">Born</a>
 		
   </p><p class="article-time">
-    <time datetime="2019-04-11T13:11:45.000Z" itemprop="datePublished"> 发表于 2019-04-11</time>
+    <time datetime="2019-04-11T15:47:06.000Z" itemprop="datePublished"> 发表于 2019-04-11</time>
     
   </p>
 </header>
@@ -97,48 +97,57 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Android4-2移植rtl8192cu驱动要点"><span class="toc-number">1.</span> <span class="toc-text">Android4.2移植rtl8192cu驱动要点</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#操作系统学习笔记（一）-进程与线程模型"><span class="toc-number">1.</span> <span class="toc-text">操作系统学习笔记（一） 进程与线程模型</span></a></li></ol>
 		
 		</div>
 		
-		<h3 id="Android4-2移植rtl8192cu驱动要点"><a href="#Android4-2移植rtl8192cu驱动要点" class="headerlink" title="Android4.2移植rtl8192cu驱动要点"></a>Android4.2移植rtl8192cu驱动要点</h3><p>我的板子上的android系统是4.2版本的，由于板子上没有wifi模块，所以买了一个usb接口的wifi模块，现在要将驱动以及wifi sdk移植到android系统中。</p>
-<pre><code>usb wifi模块上搭载了realtek8188cu芯片，rtl8192cu的驱动兼容rtl8188cus，相关驱动文件可以在realtek的官网上下载到。
-
-官方提供的文件包里有比较详细的教程，且网上有很多关于驱动移植的详细步骤，这些我就不再赘述了，这里记录下我在移植过程中碰到的种种问题：
-</code></pre><p>一、驱动移植篇</p>
-<pre><code>官方提供了详细的文档供我们移植的时候参考，但是要注意的是，在driver/include/目录下有一个autoconf.h文件，这个文件保存了整个驱动的相关配置信息。在文档中有提到一个autoconf_rtl8192c_usb_linux.h文件，这个文件时官方提供给你参考用的，可以根据这个文件里的内容区配置autoconf.h里的内容，但是我在下载的文件包里没有找到这个文件，导致之后调试驱动的时候出了不少问题。     
-
-Android4.2支持station与p2p共存，所以在加载驱动的时候会同时创建wlan0与p2p0两个设备节点。其加载命令为：
-</code></pre><p>insmod wlan.ko ifname=wlan0 if2name=p2p0<br>        这条命令在android系统中的hardware层中在开启wifi功能的时候被自动执行。在没有修改autoconf.h之前，在加载驱动的时候只能认第一个参数，而第二个参数驱动死活不认，搞得只能创建wlan0这个设备。若要使驱动支持android系统的这个特性，则要修改autoconf.h：</p>
-<p>-//#define CONFIG_CONCURRENT_MODE 1<br>+#define CONFIG_CONCURRENT_MODE<br>       将被屏蔽的这个选项选中，这样驱动在加载的时候同时创建wlan0和p2p0设备节点。</p>
-<pre><code>驱动编译成模块即可，然后将ko文件放到目标板中的system/lib/modules中，这样在使能wifi功能的时候，android底层会自动调用驱动。
-</code></pre><p>二、WIFI SDK移植篇</p>
-<pre><code> 官方文件包里提供了4.0，4.1，4.2等几个版本的SDK packages给我们，每个packages里都配有说明文档，移植起来并不是很困难。
-
-但！是！
-
-移植完毕后的所出现的问题就会相当得麻烦（对于像我这种新手来说）。
-</code></pre><p>1.android系统的wifi工作流程</p>
-<pre><code>先将这个流程整理一下，分析问题的时候就会简单得多。
-
-当我们使能wifi功能时，wifi framework层便会去调用相关JNI接口去加载驱动和wpa_supplicant，JNI接口的具体实现是由hardware层中的相关文件实现的（需要移植的部分）。按照realtek的文件来说，就是hardware/realtek/wlan/libhardware_legacy/wifi/wifi_realtek.c文件。
-
-wifi_realtek.c文件负责加载wifi驱动和wap_supplicant，若有一星半点问题都会导致wifi无法开启。
-
-以下是我的调试过程中遇到的问题与解决方法：
-</code></pre><p>①Cannot load driver！（*）</p>
-<p>这里是framework层报的错误，跟踪下来就发现是调用了wifi_realtek.c文件中的intwifi_load_driver()函数，若是使用模块方式加载驱动，wifi_load_driver会去调用int load_driver()函数。驱动加载很简单，出现这种问题一般是忘记将ko文件放到指定目录，或者驱动已被加载所导致的。</p>
-<p>②I/wpa_supplicant(2254): rfkill: Cannot open RFKILL control device</p>
-<p>出现这个问题原因是无法打开dev/rfkill设备节点，修改其权限即可：</p>
-<p>chmod 0777 /dev/rfkill</p>
-<p>③wifi_start_supplicantget wifi_ifname(SECONDARY) fail</p>
-<p>出现这个报错是因为没有 创建p2p0设备节点，导致</p>
-<p>insmod wlan.ko ifname=wlan0 if2name=p2p0</p>
-<p>命令执行不成功，修改内核即可解决问题</p>
-<p>④E/WifiStateMachine(1783): Failed to start supplicant!</p>
-<p>这是framework层中的报错，是由于wap_supplicant没有正确开启所导致的。主要还是在wifi_realtek.c中的int wifi_start_supplicant(int p2p_supported)中找问题。</p>
-<p>将中的</p>
-<p>wifi_stop_supplicant(p2p_supported);<br>wifi_close_supplicant_connection(NULL);<br>wifi_close_supplicant_connection(“sec”);<br>屏蔽掉就好。<br>关于这个问题我也没有弄明白，只不过屏蔽之后就能正确开启wifi了，所以详细解决办法还在研究中。。。</p>
+		<h3 id="操作系统学习笔记（一）-进程与线程模型"><a href="#操作系统学习笔记（一）-进程与线程模型" class="headerlink" title="操作系统学习笔记（一） 进程与线程模型"></a>操作系统学习笔记（一） 进程与线程模型</h3><p>进程可以说是操作系统最为核心的一个抽象，而线程可以认为是一种轻量级的进程，或者说一个进程内的多个迷你进程。</p>
+<p>一、进程的模型</p>
+<p>进程(process):进程是一个正在运行的程序的实例。对于一个单核的处理器，每个时刻只能运行一个程序，但在每一个时间段，它可能运行多个进程，这样就产生了并行的错觉。</p>
+<p>从概念上说，每个进程拥有自己的虚拟CPU，好像它独占了CPU的使用权一样，虽然实际的CPU是不断切换的。进程的另外一大特性，是独立的虚拟地址空间。</p>
+<p>进程的创建</p>
+<p>有四种事件导致进程的创建：<br>（1）系统初始化。系统初始化会创建许多进程，如windows刚开机的时候。</p>
+<p>（2）执行了正在运行的进程所调用的系统调用。如程序运行了一个fork()调用。</p>
+<p>（3）用户请求创建一个进程。如命令行中输入./a.out。</p>
+<p>（4）一个批处理作业的初始化。</p>
+<p>进程的终止</p>
+<p>进程是正在运行的程序的实例，一个程序是会运行完的，所以进程也有终止的时候：</p>
+<p>（1）正常退出（自愿）。如程序正常结束。</p>
+<p>（2）出错退出（自愿）。如编写一个程序，当错误时调用exit(num)。</p>
+<p>（3）严重错误（非自愿）。</p>
+<p>（4）被其他进程杀死（非自愿）。如另外一个进程调用了kill(pid)。</p>
+<p>进程的层次结构</p>
+<p>不同操作系统有不同的概念。Linux系统中区分父进程与子进程，windows系统则不区分。</p>
+<p>进程的状态</p>
+<p>进程有三种主要状态：</p>
+<p>（1）运行态：正在CPU上运行的进程。</p>
+<p>（2）就绪态：已经就绪但是还没有被调度程序选中。</p>
+<p>（3）阻塞态：因为某种原因（如等待I/O完成）暂时无法执行，需要等待外部事件。</p>
+<p>下面有一幅图画出了可能的转换关系。需要注意的是，阻塞态的进程必须先进入就绪态，等待处理器的调度。</p>
+<pre><code>就绪态&lt;-------&gt;运行态-----&gt;阻塞态
+      &lt;----------------------
+</code></pre><p>进程的实现</p>
+<p>进程的实现，相对于线程来说是比较确定的。操作系统内核维护一个进程表，也称为进程控制块（PCB）。进程表项为一个进程启动的必要信息，包括进程管理（寄存器，PC，PSW，调度信息，打开文件的状态等）、存储管理（代码段、数据段、堆栈段指针等）、文件管理（目录、PID等）信息。</p>
+<p>当进程从运行态进入其他状态时，PCB保存着启动它的所有信息，当该进程再次被调度程序选中时，就要恢复这些信息。保存的步骤，包括：硬件压入PC等，把中断向量装入新的PC，然后通过汇编语言保存寄存器并设置新的堆栈，运行中断服务程序（通常为C），再通过调度程序选中一个进程，把它的运行信息载入寄存器以及PC等。</p>
+<p>二、线程的模型</p>
+<p>线程的使用，是因为进程创建、撤销、切换的代价很大，并且需要共享内存空间和数据，以及提高运行速度。一个例子是Web服务器，它如果采用进程的方式，那么一个页面请求被响应时，进程就进入了阻塞态，从而无法提供其他服务。而采用线程，可以使用一个线程接受请求，然后把请求分派给工作线程，实现同时响应，并且共享内存。</p>
+<p>线程模型基于两个概念：资源分组处理与执行。线程的目的，是共享资源，并共同完成一个任务。</p>
+<p>线程与进程非常类似，不过比进程轻量，原因在于：进程拥有独立的虚拟地址空间，而同一个进程中的线程，共享内存空间与资源。因此，线程只需要保存PC、寄存器、堆栈等，无需保存大量的文件、进程管理信息。线程之间也是没有保护并且平等的，因为它们共享了同样的资源，包括打开的文件、子进程等。</p>
+<p>POSIX（portable operating system interface of UNIX）规定了UNIX系统的通用线程包pthread。</p>
+<p>线程的实现</p>
+<p>线程的实现，总的来说有两种：在用户空间中实现线程，以及在内核中实现线程。</p>
+<p>用户空间中实现线程</p>
+<p>这种情况下，内核是不知道线程存在的，调度单位是进程。因此，为了体现多线程的作用，就必须考虑阻塞的问题。</p>
+<p>因为用户管理线程，所以每个进程都要有线程表，与进程表类似，不过记录的内容比较少。</p>
+<p>用户级线程的优点有很多：</p>
+<p>（1）可以在不支持线程的系统上运行。</p>
+<p>（2）速度非常快，因为它不需要陷入内核，不需要上下文切换，也不需要cache刷新。</p>
+<p>（3）可以允许每个进程定制自己的线程调度算法。</p>
+<p>当然，因为内核不知道线程的存在，需要解决阻塞的问题，可以通过非阻塞系统调用，或者检查调用是否会阻塞（如select，包装器）。</p>
+<p>另外，因为内核不知道线程的存在，进程内部没有时钟中断，所以线程必须主动让出CPU，不然其他线程无法抢占。</p>
+<p>内核中实现线程</p>
+<p>内核中实现线程，即在内核中维护一个线程表，而进程不维护。与用户空间中实现相比，优缺点基本是相反的。</p>
+<p>内核中的实现，自然不需要非阻塞I/O，但是代价就是，线程的操作花销很大。</p>
   
 	</div>
 		<footer class="article-footer clearfix">
@@ -151,7 +160,7 @@ wifi_realtek.c文件负责加载wifi驱动和wap_supplicant，若有一星半点
 
 	<div class="article-share" id="share">
 	
-	  <div data-url="http://yoursite.com/2019/04/11/Android4-2移植rtl8192cu驱动要点/" data-title="Android4.2移植rtl8192cu驱动要点 | Born" data-tsina class="share clearfix">
+	  <div data-url="http://yoursite.com/2019/04/11/操作系统学习笔记（一）-进程与线程模型/" data-title="操作系统学习笔记（一） 进程与线程模型 | Born" data-tsina class="share clearfix">
 	  </div>
 	
 	</div>
@@ -165,18 +174,18 @@ wifi_realtek.c文件负责加载wifi驱动和wap_supplicant，若有一星半点
 <nav class="article-nav clearfix">
  
  <div class="prev">
- <a href="/2019/04/11/操作系统学习笔记（一）-进程与线程模型/" title="操作系统学习笔记（一） 进程与线程模型">
+ <a href="/2019/04/11/操作系统学习笔记（二）-信号量、条件变量、互斥量、读写锁/" title="操作系统学习笔记（二） 信号量、条件变量、互斥量、读写锁">
   <strong>上一篇：</strong><br>
   <span>
-  操作系统学习笔记（一） 进程与线程模型</span>
+  操作系统学习笔记（二） 信号量、条件变量、互斥量、读写锁</span>
 </a>
 </div>
 
 
 <div class="next">
-<a href="/2019/04/09/lcm-ESD/" title="lcm ESD">
+<a href="/2019/04/11/Android4-2移植rtl8192cu驱动要点/" title="Android4.2移植rtl8192cu驱动要点">
  <strong>下一篇：</strong><br> 
- <span>lcm ESD
+ <span>Android4.2移植rtl8192cu驱动要点
 </span>
 </a>
 </div>
@@ -193,7 +202,7 @@ wifi_realtek.c文件负责加载wifi驱动和wap_supplicant，若有一星半点
   <div id="toc" class="toc-aside">
   <strong class="toc-title">文章目录</strong>
  
- <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Android4-2移植rtl8192cu驱动要点"><span class="toc-number">1.</span> <span class="toc-text">Android4.2移植rtl8192cu驱动要点</span></a></li></ol>
+ <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#操作系统学习笔记（一）-进程与线程模型"><span class="toc-number">1.</span> <span class="toc-text">操作系统学习笔记（一） 进程与线程模型</span></a></li></ol>
  
   </div>
 

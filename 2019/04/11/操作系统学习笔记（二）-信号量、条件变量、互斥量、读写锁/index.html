@@ -1,0 +1,498 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+  
+    <title>操作系统学习笔记（二） 信号量、条件变量、互斥量、读写锁 | Born</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Born">
+    
+
+    
+    <meta name="description" content="操作系统学习笔记（二） 信号量、条件变量、互斥量、读写锁在有了进程和线程的模型之后，一个很大的问题就摆在眼前：进程和线程的执行顺序是不可预知的，那么，如何使得两个进程按照我们想要的顺序执行，从而得出正确的结果呢？ 竞争条件：两个或者多个进程读写某些共享数据，最后的结果依赖于进程运行的精确时序。 临界区：把对共享内存进行访问的程序片段称作临界区。如果能使两个进程不可能同时处于临界区内，就能够避免竞争">
+<meta property="og:type" content="article">
+<meta property="og:title" content="操作系统学习笔记（二） 信号量、条件变量、互斥量、读写锁">
+<meta property="og:url" content="http://yoursite.com/2019/04/11/操作系统学习笔记（二）-信号量、条件变量、互斥量、读写锁/index.html">
+<meta property="og:site_name" content="Born">
+<meta property="og:description" content="操作系统学习笔记（二） 信号量、条件变量、互斥量、读写锁在有了进程和线程的模型之后，一个很大的问题就摆在眼前：进程和线程的执行顺序是不可预知的，那么，如何使得两个进程按照我们想要的顺序执行，从而得出正确的结果呢？ 竞争条件：两个或者多个进程读写某些共享数据，最后的结果依赖于进程运行的精确时序。 临界区：把对共享内存进行访问的程序片段称作临界区。如果能使两个进程不可能同时处于临界区内，就能够避免竞争">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-04-11T15:56:25.899Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="操作系统学习笔记（二） 信号量、条件变量、互斥量、读写锁">
+<meta name="twitter:description" content="操作系统学习笔记（二） 信号量、条件变量、互斥量、读写锁在有了进程和线程的模型之后，一个很大的问题就摆在眼前：进程和线程的执行顺序是不可预知的，那么，如何使得两个进程按照我们想要的顺序执行，从而得出正确的结果呢？ 竞争条件：两个或者多个进程读写某些共享数据，最后的结果依赖于进程运行的精确时序。 临界区：把对共享内存进行访问的程序片段称作临界区。如果能使两个进程不可能同时处于临界区内，就能够避免竞争">
+
+    
+    <link rel="alternative" href="/atom.xml" title="Born" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+</html>
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="Born" title="Born"></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="Born">Born</a></h1>
+				<h2 class="blog-motto">The life is a puzzle</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索">
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</ul></nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2019/04/11/操作系统学习笔记（二）-信号量、条件变量、互斥量、读写锁/" title="操作系统学习笔记（二） 信号量、条件变量、互斥量、读写锁" itemprop="url">操作系统学习笔记（二） 信号量、条件变量、互斥量、读写锁</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Born" target="_blank" itemprop="author">Born</a>
+		
+  </p><p class="article-time">
+    <time datetime="2019-04-11T15:53:29.000Z" itemprop="datePublished"> 发表于 2019-04-11</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#操作系统学习笔记（二）-信号量、条件变量、互斥量、读写锁"><span class="toc-number">1.</span> <span class="toc-text">操作系统学习笔记（二） 信号量、条件变量、互斥量、读写锁</span></a></li></ol>
+		
+		</div>
+		
+		<h3 id="操作系统学习笔记（二）-信号量、条件变量、互斥量、读写锁"><a href="#操作系统学习笔记（二）-信号量、条件变量、互斥量、读写锁" class="headerlink" title="操作系统学习笔记（二） 信号量、条件变量、互斥量、读写锁"></a>操作系统学习笔记（二） 信号量、条件变量、互斥量、读写锁</h3><p>在有了进程和线程的模型之后，一个很大的问题就摆在眼前：进程和线程的执行顺序是不可预知的，那么，如何使得两个进程按照我们想要的顺序执行，从而得出正确的结果呢？</p>
+<p>竞争条件：两个或者多个进程读写某些共享数据，最后的结果依赖于进程运行的精确时序。</p>
+<p>临界区：把对共享内存进行访问的程序片段称作临界区。如果能使两个进程不可能同时处于临界区内，就能够避免竞争。</p>
+<p>先引入一个经典的进程同步问题：生产者-消费者问题。</p>
+<p>生产者-消费者问题：有一个缓冲区，一个（或多个）进程在生产某种产品，它生产的东西会放入缓冲区内；一个（或多个）进程在消费产品，它会从缓冲区内取走产品。当缓冲区满时，生产者应当暂时停止生产；当缓冲区为空时，消费者应当暂时停止消费。</p>
+<p>很显然，这个问题用简单的判断缓冲区是否为0或N是无法解决的。如果在消费者判断缓冲区为0时，恰好遇到了进程切换，生产者进程开始运行，此时应当唤醒消费者，然而这个信号丢失了，因为切换到消费者才进行了睡眠。这时，生产者会不断运行，直到缓冲区满，两个进程全部睡眠，造成了死锁。代码如下：</p>
+<p>复制代码</p>
+<p>#define N 1000<br>int count=0;<br>void producer(void)<br>{<br>    int item;<br>    while(TRUE)<br>    {<br>        item=produce_item();<br>        if(count==N) sleep();//一段时间后，缓冲区满，生产者进程也睡眠了<br>        insert_item(item);<br>        count=count+1;<br>        if(count==1) wakeup(consumer);//设想判断条件成立时，切换了进程，再次切回时，唤醒消费者进程，然而消费者进程此时没有睡眠，信号丢失<br>    }<br>}</p>
+<p>void consumer(void)<br>{<br>    int item;<br>    while(TRUE)<br>    {<br>        if(count==0) sleep();//第一次count=1，消费者进程不会睡眠；第二次确实睡眠了<br>        item=remove_item();<br>        count=count-1;//此时缓冲区确实为空了<br>        if(count==N-1) wakeup(producer);<br>        consume_item(item);<br>    }<br>}<br>复制代码</p>
+<p>一、信号量</p>
+<p>信号量是一种数据结构，可以理解为一个用来计数的整数和一个队列。整数用来记录唤醒次数，而队列被用来记录因为该信号量而阻塞的进程。</p>
+<p>信号量只支持两种操作：P/V操作。</p>
+<p>P操作，可以理解为测试并减一。P(signal1)，如果signal1大于0，那么把它减一，进程继续执行；如果signal为0，那么执行P操作的进程将会被阻塞，从而变为阻塞态，添加到因为signal1信号而阻塞的进程队列中。</p>
+<p>V操作，可以理解为+1并唤醒。V(signal1)后，如果signal1本来就大于0，那么执行+1；如果有进程在该信号量上被阻塞，那么从队列中根据某种策略选择一个进程唤醒。如果多个进程在该信号量上阻塞，那么V操作后，signal1仍然可能为负数。</p>
+<p>需要注意的是，P/V操作均应当是原子操作，即作为一个整体执行而不会被打断。</p>
+<p>有了信号量，我们再来看生产者-消费者问题：</p>
+<p>复制代码</p>
+<p>#define N 1000<br>typedef int semaphore;<br>semaphore mutex=1;//控制对临界区的访问，其实就是互斥量<br>semaphore empty=N;//表示空槽的数量<br>semaphore full=0;//填满的槽的数量<br>int count=0;<br>void producer(void)<br>{<br>    int item;<br>    while(TRUE)<br>    {<br>        item=produce_item();<br>        down(&amp;empty);<br>        down(&amp;mutex);//要改变共享区（缓冲区），加锁<br>        insert_item(item);<br>        up(&amp;mutex);//解锁<br>        up(&amp;full);<br>    }<br>}</p>
+<p>void consumer(void)<br>{<br>    int item;<br>    while(TRUE)<br>    {<br>        down(&amp;full);<br>        down(&amp;mutex);<br>        item=remove_item();<br>        up(&amp;mutex);<br>        up(&amp;empty);<br>        consume_item(item);<br>    }<br>}<br>复制代码<br>有了信号量，这个问题就好解决多了：用信号量full、empty来表示已用和未用的数量，这样不管是满了还是空了，都不会造成死锁的问题。mutex的操作就是我们接下来要介绍的互斥锁。</p>
+<p>二、互斥锁</p>
+<p>互斥量其实可以理解为一个简化的信号量，它只有两种状态：0和1。互斥锁是用来解决进程（线程）互斥问题的。所谓进程互斥，就是两个进程实际上是一种互斥的关系，两者不能同时访问共享资源。</p>
+<p>互斥量和信号量原理比较类似，一旦一个线程获得了锁，那么其它线程就无法访问共享资源，从而被阻塞，直到该线程交还出了锁的所有权，另外一个线程才能获得锁。</p>
+<p>互斥锁的例子就不再给出，上面程序中已经有了，下面的程序中也会出现。</p>
+<p>三、条件变量</p>
+<p>条件变量是另外一种同步机制，可以用于线程和管程中的进程互斥。通常与互斥量一起使用。</p>
+<p>条件变量允许线程由于一些暂时没有达到的条件而阻塞。通常，等待另一个线程完成该线程所需要的条件。条件达到时，另外一个线程发送一个信号，唤醒该线程。</p>
+<p>条件变量对应的一组操作是pthread_cond_wait和pthread_cond_signal。</p>
+<p>条件变量与互斥量一起使用，一般情况是：一个线程锁住一个互斥量，然后当它不能获得它期待的结果时，等待一个条件变量；最后另外一个线程向它发送信号，使得它可以继续执行。</p>
+<p>需要注意的是，pthread_cond_wait会暂时解开持有的互斥锁。</p>
+<p>四、读写锁</p>
+<p>读写锁相对上面的问题会复杂一些，它被用来解决一个经典的问题：读者-写者问题。</p>
+<p>读写锁与互斥量类似，不过读写锁允许更高的并行性。互斥量要么是锁住状态要么是不加锁状态，而且一次只有一个线程可以对其加锁。</p>
+<p>下面的代码考虑的是读者优先的读者-写者问题，对于共享区域的读写规则如下：</p>
+<p>1.只要有一个读者在读，后来的读者可以进入共享区直接读。</p>
+<p>2.只要有一个读者在读，写者就必须阻塞，直到最后一个读者离开。</p>
+<p>3.不考虑抢占式，写者在写时，即使有读者到达，也会在就绪态等待。</p>
+<p>复制代码<br>typedef int semaphore;<br>semaphore mutex=1;    //互斥锁,控制对rc的访问<br>semaphore db=1;        //控制对数据库的访问<br>int rc=0;        //当前读者计数</p>
+<p>void reader(void)<br>{<br>    while(TRUE)<br>    {<br>        down(&amp;mutex);//加锁<br>        rc=rc+1;<br>        if(rc==1) down(&amp;db);//第一个读者，加锁<br>        up(&amp;mutex);<br>        read_data_base();<br>        down(&amp;mutex);<br>        rc=rc-1;<br>        if(rc==0) up(&amp;db);//最后一个读者离开，解锁<br>        up(&amp;mutex);<br>        use_data_read();<br>    }<br>}</p>
+<p>void writer(void)<br>{<br>    while(TRUE)<br>    {<br>        think_up_data();<br>        down(&amp;db);//获取数据库访问的锁<br>        write_data_base();<br>        up(&amp;db);<br>    }<br>}<br>复制代码</p>
+<p>这里，我们其实用了两个互斥锁来实现了读写锁。一个互斥锁用来保护共享区，另外一个互斥锁用来保护读者计数器。</p>
+<p>读写锁可以由三种状态：读模式下加锁状态、写模式下加锁状态、不加锁状态。一次只有一个线程可以占有写模式的读写锁，但是多个线程可以同时占有读模式的读写锁。</p>
+<p>在读写锁是写加锁状态时，在这个锁被解锁之前，所有试图对这个锁加锁的线程都会被阻塞。当读写锁在读加锁状态时，所有试图以读模式对它进行加锁的线程都可以得到访问权，但是如果线程希望以写模式对此锁进行加锁，它必须阻塞直到所有的线程释放读锁。虽然读写锁的实现各不相同，但当读写锁处于读模式锁住状态时，如果有另外的线程试图以写模式加锁，读写锁通常会阻塞随后的读模式锁请求。这样可以避免读模式锁长期占用，而等待的写模式锁请求一直得不到满足。</p>
+<p>读写锁非常适合于对数据结构读的次数远大于写的情况。当读写锁在写模式下时，它所保护的数据结构就可以被安全地修改，因为当前只有一个线程可以在写模式下拥有这个锁。当读写锁在读状态下时，只要线程获取了读模式下的读写锁，该锁所保护的数据结构可以被多个获得读模式锁的线程读取。</p>
+<p>读写锁也叫做共享-独占锁，当读写锁以读模式锁住时，它是以共享模式锁住的；当他以写模式锁住时，它是以独占模式锁住的。</p>
+<p>五、总结</p>
+<p>这里，主要是简单总结一下这几种同步量的用法。</p>
+<p>1、互斥锁只用在同一个线程中，用来给一个需要对临界区进行读写的操作加锁。</p>
+<p>2、信号量与互斥量不同的地方在于，信号量一般用在多个进程或者线程中，分别执行P/V操作。</p>
+<p>3、条件变量一般和互斥锁同时使用，或者用在管程中。</p>
+<p>4、互斥锁，条件变量都只用于同一个进程的各线程间，而信号量（有名信号量）可用于不同进程间的同步。当信号量用于进程间同步时，要求信号量建立在共享内存区。</p>
+<p>5、互斥锁是为上锁而优化的；条件变量是为等待而优化的； 信号量既可用于上锁，也可用于等待，因此会有更多的开销和更高的复杂性。</p>
+<p>参考书籍：《现代操作系统》</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://yoursite.com/2019/04/11/操作系统学习笔记（二）-信号量、条件变量、互斥量、读写锁/" data-title="操作系统学习笔记（二） 信号量、条件变量、互斥量、读写锁 | Born" data-tsina class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev">
+ <a href="/2019/04/11/操作系统学习笔记（三）-进程和线程的调度/" title="操作系统学习笔记（三） 进程和线程的调度">
+  <strong>上一篇：</strong><br>
+  <span>
+  操作系统学习笔记（三） 进程和线程的调度</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2019/04/11/操作系统学习笔记（一）-进程与线程模型/" title="操作系统学习笔记（一） 进程与线程模型">
+ <strong>下一篇：</strong><br> 
+ <span>操作系统学习笔记（一） 进程与线程模型
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#操作系统学习笔记（二）-信号量、条件变量、互斥量、读写锁"><span class="toc-number">1.</span> <span class="toc-text">操作系统学习笔记（二） 信号量、条件变量、互斥量、读写锁</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+
+
+  
+
+  
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://coderq.com" target="_blank" title="一个面向程序员交流分享的新一代社区">码农圈</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://wuchong.me" target="_blank" title="Born&#39;s Blog">Born&#39;s Blog</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+  <div class="weiboshow">
+  <p class="asidetitle">新浪微博</p>
+    <iframe width="100%" height="119" class="share_self" frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=119&fansRow=2&ptype=1&speed=0&skin=9&isTitle=1&noborder=1&isWeibo=0&isFans=0&uid=&verifier=b3593ceb&dpc=1"></iframe>
+</div>
+
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer">
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Hello ,I&#39;m Json Born in Google. <br>
+			This is my blog,believe it or not.</p>
+	</section>
+	 
+	<div class="social-font">
+		
+		<a href="http://weibo.com/2176287895" target="_blank" class="icon-weibo" title="微博"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2019 
+		
+		<a href="/about" target="_blank" title="Born">Born</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?e6d1f421bbc9962127a50488f9ed37d1";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
